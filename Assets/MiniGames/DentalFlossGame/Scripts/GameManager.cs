@@ -4,15 +4,20 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static GameManager Instance;
+
+    void Awake()
     {
-        
+        Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    void Start()
     {
-        
+        Debug.Log("Juego de Dental Floss iniciado");
+    }
+
+    public void AddScore(int amount)
+    {
+        ScoreSystem.Instance.AddScore(amount);
     }
 }

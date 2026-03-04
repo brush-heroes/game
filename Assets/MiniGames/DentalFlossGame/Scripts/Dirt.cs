@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class Dirt : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    // Se ejecuta cuando algo entra en el Trigger 2D
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        
-    }
+        // Verificamos si lo que nos tocó es la seda dental (Tag: Player)
+        if (other.CompareTag("Player"))
+        {
+            // Aquí podrías llamar al ScoreSystem para sumar puntos
+            // FindObjectOfType<ScoreSystem>().AddScore(10);
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            Debug.Log("¡Suciedad limpia!");
+            Destroy(gameObject); // Eliminamos la mancha
+        }
     }
 }
