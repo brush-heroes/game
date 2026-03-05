@@ -22,11 +22,13 @@ public class FlossController : MonoBehaviour
             // Si el mouse está a la derecha del centro, invertimos la escala en X
             if (mousePos.x > 0)
             {
-                transform.localScale = new Vector3(-1, 1, 1);
+                // Si el mouse está a la derecha, escala normal (o -1 según tu diseño)
+                transform.localScale = new Vector3(1, 1, 1);
             }
             else
             {
-                transform.localScale = new Vector3(1, 1, 1);
+                // Si el mouse está a la izquierda, hacemos el espejo
+                transform.localScale = new Vector3(-1, 1, 1);
             }
         }
     }

@@ -16,12 +16,15 @@ public class DirtSpawner : MonoBehaviour
 
     void SpawnDirt()
     {
-        // Generar una posición aleatoria dentro del rango
-        float randomX = Random.Range(-spawnArea.x, spawnArea.x);
-        float randomY = Random.Range(-spawnArea.y, spawnArea.y);
-        Vector3 spawnPos = new Vector3(randomX, randomY, 0);
+        // Elegimos lado: -1 para izquierda, 1 para derecha
+        float lado = (Random.value > 0.5f) ? -1f : 1f;
 
-        // Crear la instancia del Prefab
-        Instantiate(dirtPrefab, spawnPos, Quaternion.identity);
+        // Distancia desde el centro. 
+        // Prueba con 3.5f. Si quedan muy al centro, sube a 3.8f.
+        float posicionX = 3.5f * lado;
+
+        float posicionY = Random.Range(-spawnArea.y, spawnArea.y);
+
+        Instantiate(dirtPrefab, new Vector3(posicionX, posicionY, 0), Quaternion.identity);
     }
 }
