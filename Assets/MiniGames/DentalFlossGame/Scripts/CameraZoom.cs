@@ -1,18 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CameraZoom : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Camera cam;
+    public float finalSize = 2f; 
+    public float zoomSpeed = 2f;
+    public string gameplayScene = "DentalFlossGame";
 
-    // Update is called once per frame
     void Update()
     {
-        
+        cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, finalSize, Time.deltaTime * zoomSpeed);
+
+        if (Mathf.Abs(cam.orthographicSize - finalSize) < 0.05f)
+        {
+            SceneManager.LoadScene(gameplayScene);
+        }
     }
 }
