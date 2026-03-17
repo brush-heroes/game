@@ -3,23 +3,16 @@ using UnityEngine.InputSystem;
 
 public class BrushController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        Vector2 mousePos = Mouse.current.position.ReadValue();
+        Vector2 mouse = Mouse.current.position.ReadValue();
 
-        Ray ray = Camera.main.ScreenPointToRay(mousePos);
+        Ray ray = Camera.main.ScreenPointToRay(mouse);
 
         float distance = -Camera.main.transform.position.z;
 
         Vector3 worldPos = ray.origin + ray.direction * distance;
 
-        transform.position = worldPos;
+        transform.position = new Vector3(worldPos.x, worldPos.y, 0f);
     }
 }
