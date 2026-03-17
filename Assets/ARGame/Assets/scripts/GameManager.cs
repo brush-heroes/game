@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace DentalFlossGame
+namespace ARGame
 {
     public class GameManager : MonoBehaviour
     {
