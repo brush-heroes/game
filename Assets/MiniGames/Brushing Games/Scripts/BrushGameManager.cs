@@ -7,6 +7,13 @@ public class BrushGameManager : MonoBehaviour
     public ZoneType currentType;
     public ZoneSide currentSide;
 
+    public GameObject chewingRightGroup;
+    public GameObject outsideRightGroup;
+    public GameObject insideRightGroup;
+    public GameObject chewingLeftGroup;
+    public GameObject outsideLeftGroup;
+    public GameObject insideLeftGroup;
+
     public int cleaned = 0;
     public int target = 3;
 
@@ -40,30 +47,68 @@ void NextStep()
 
     Debug.Log("Paso completado");
 
-    // Chewing Right → Outside Right
+    // RIGHT SIDE
+
     if (currentType == ZoneType.Chewing && currentSide == ZoneSide.Right)
     {
-        currentType = ZoneType.Outside;
-        currentSide = ZoneSide.Right;
+        chewingRightGroup.SetActive(false);
+        outsideRightGroup.SetActive(true);
 
-        Debug.Log("Nueva fase: Outside Right");
+        currentType = ZoneType.Outside;
     }
 
-    // Outside Right → Inside Right
     else if (currentType == ZoneType.Outside && currentSide == ZoneSide.Right)
     {
-        currentType = ZoneType.Inside;
-        currentSide = ZoneSide.Right;
+        outsideRightGroup.SetActive(false);
+        insideRightGroup.SetActive(true);
 
-        Debug.Log("Nueva fase: Inside Right");
+        currentType = ZoneType.Inside;
     }
 
-    // Inside Right → (luego izquierda)
     else if (currentType == ZoneType.Inside && currentSide == ZoneSide.Right)
     {
+        insideRightGroup.SetActive(false);
+
         Debug.Log("Terminaste lado derecho 🔥");
 
-        // luego aquí pasamos al lado izquierdo
+        // PASAR A IZQUIERDA
+        chewingLeftGroup.SetActive(true);
+
+        currentType = ZoneType.Chewing;
+        currentSide = ZoneSide.Left;
+
+        Debug.Log("Nueva fase: Chewing Left");
+    }
+
+    // LEFT SIDE
+
+    else if (currentType == ZoneType.Chewing && currentSide == ZoneSide.Left)
+    {
+        chewingLeftGroup.SetActive(false);
+        outsideLeftGroup.SetActive(true);
+
+        currentType = ZoneType.Outside;
+
+        Debug.Log("Nueva fase: Outside Left");
+    }
+
+    else if (currentType == ZoneType.Outside && currentSide == ZoneSide.Left)
+    {
+        outsideLeftGroup.SetActive(false);
+        insideLeftGroup.SetActive(true);
+
+        currentType = ZoneType.Inside;
+
+        Debug.Log("Nueva fase: Inside Left");
+    }
+
+    else if (currentType == ZoneType.Inside && currentSide == ZoneSide.Left)
+    {
+        insideLeftGroup.SetActive(false);
+
+        Debug.Log("🎉 TERMINASTE TODO EL CEPILLADO 🎉");
+
+        // aquí luego puedes poner victoria
     }
 }
 }
