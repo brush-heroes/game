@@ -8,10 +8,18 @@ public class Dirt : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            GameManager.Instance.AddScore(10);
+            FlossController floss = collision.GetComponentInParent<FlossController>();
 
-            Debug.Log("¡Limpio! +10 puntos");
-            Destroy(gameObject);
+            if (floss != null && floss.isMovingUp)
+            {
+                GameManager.Instance.AddScore(10);
+                Debug.Log("Clean!");
+                Destroy(gameObject);
+            }
+            else
+            {
+                Debug.Log("Wrong!");
+            }
         }
     }
 }

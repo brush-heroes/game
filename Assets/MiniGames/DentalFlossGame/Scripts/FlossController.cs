@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class FlossController : MonoBehaviour
 {
-    public float speed = 15f;
     public float lerpSpeed = 10f;
+    private Vector3 lastPosition;
+    public bool isMovingUp { get; private set; }
+
+    void Start() => lastPosition = transform.position;
 
     void Update()
     {
@@ -16,14 +19,14 @@ public class FlossController : MonoBehaviour
 
             transform.position = Vector3.Lerp(transform.position, mousePos, lerpSpeed * Time.deltaTime);
 
-            if (mousePos.x > 0)
-            {
-                transform.localScale = new Vector3(1, 1, 1);
-            }
-            else
-            {
-                transform.localScale = new Vector3(-1, 1, 1);
-            }
+            isMovingUp = transform.position.y > lastPosition.y + 0.01f;
+            lastPosition = transform.position;
+
+            transform.localScale = new Vector3(mousePos.x > 0 ? 1 : -1, 1, 1);
+        }
+        else
+        {
+            isMovingUp = false;
         }
     }
 }
