@@ -7,9 +7,18 @@ public class ScoreManager : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI scoreText;
 
+    [Header("Zone-aware cleaning")]
+    [SerializeField] int pointsCorrectTargetZone = 2;
+    [SerializeField] int pointsWrongZoneWhileTargetHasWork = -1;
+
     int score;
     private int totalSpawned;
     private int totalCleaned;
+    private int cleansInTargetZone;
+    private int cleansOutsideTargetZone;
+
+    public int CleansInTargetZone => cleansInTargetZone;
+    public int CleansOutsideTargetZone => cleansOutsideTargetZone;
 
     void Awake()
     {
@@ -27,13 +36,26 @@ public class ScoreManager : MonoBehaviour
     public void RegisterSpawn()
     {
         totalSpawned++;
-        Debug.Log("[Score] Spawned: " + totalSpawned);
     }
 
-    public void RegisterClean()
+    /// <summary>
+    /// Wrong-zone cleans are only penalized while the current step's zone still has bacteria to finish
+    /// (not fully spawned yet, or still alive). Cleaning another zone after the target is done is neutral.
+    /// </summary>
+    public void RegisterCleanResult(BrushZone cleanedZone, BrushZone currentTargetZone, bool targetZoneStillHasWork)
     {
         totalCleaned++;
-        Debug.Log("[Score] Cleaned: " + totalCleaned);
+
+        if (cleanedZone == currentTargetZone)
+        {
+            cleansInTargetZone++;
+            AddScore(pointsCorrectTargetZone);
+            return;
+        }
+
+        cleansOutsideTargetZone++;
+        if (targetZoneStillHasWork)
+            AddScore(pointsWrongZoneWhileTargetHasWork);
     }
 
     public float GetAccuracy()
@@ -44,11 +66,21 @@ public class ScoreManager : MonoBehaviour
         return (float)totalCleaned / totalSpawned;
     }
 
+    public float GetTargetZoneFocusRatio()
+    {
+        int zoneCleans = cleansInTargetZone + cleansOutsideTargetZone;
+        if (zoneCleans == 0)
+            return 0f;
+        return (float)cleansInTargetZone / zoneCleans;
+    }
+
     public void ResetSession()
     {
         score = 0;
         totalSpawned = 0;
         totalCleaned = 0;
+        cleansInTargetZone = 0;
+        cleansOutsideTargetZone = 0;
         UpdateScoreText();
     }
 

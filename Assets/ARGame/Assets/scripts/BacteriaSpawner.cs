@@ -10,6 +10,7 @@ public class BacteriaSpawner : MonoBehaviour
         public BrushZone zone;
         public Transform transform;
         public int currentCount;
+        public int aliveCount;
         public int maxCount;
         public float spawnTimer;
         public bool isFullySpawned;
@@ -21,12 +22,20 @@ public class BacteriaSpawner : MonoBehaviour
     [SerializeField] SessionManager sessionManager;
     [SerializeField] private int bacteriaPerZone = 10;
 
+    [Header("Active zone pacing")]
+    [Tooltip("While a zone is the current brushing step, it also fills on this clock so it feels urgent even if the global timeline was only halfway.")]
+    [SerializeField] float activeZoneRampDuration = 12f;
+    [Tooltip("How many bacteria the current step's zone may spawn per frame when catching up.")]
+    [SerializeField] int activeZoneMaxSpawnsPerFrame = 4;
+
     MouthZoneManager mouthZoneManager;
     readonly List<GameObject> spawnedBacteria = new List<GameObject>();
     private Dictionary<BrushZone, ZoneData> zones = new Dictionary<BrushZone, ZoneData>();
 
     private bool isInitialized;
     private float sessionTimer;
+    private float secondsIntoCurrentStep;
+    private bool sessionClearInProgress;
 
     void Start()
     {
@@ -36,19 +45,34 @@ public class BacteriaSpawner : MonoBehaviour
     void OnEnable()
     {
         if (sessionManager != null)
+        {
             sessionManager.OnSessionStarted += OnSessionStarted;
+            sessionManager.OnStepChanged += OnSessionStepChanged;
+        }
     }
 
     void OnDisable()
     {
         if (sessionManager != null)
+        {
             sessionManager.OnSessionStarted -= OnSessionStarted;
+            sessionManager.OnStepChanged -= OnSessionStepChanged;
+        }
+    }
+
+    void OnSessionStepChanged(SessionStep step, int stepIndex)
+    {
+        secondsIntoCurrentStep = 0f;
+        RefreshBacteriaTargetHighlights();
     }
 
     void OnSessionStarted()
     {
+        sessionClearInProgress = true;
         ClearSpawnedBacteria();
         ResetAllZoneCounters();
+        secondsIntoCurrentStep = 0f;
+        sessionClearInProgress = false;
     }
 
     void ResetAllZoneCounters()
@@ -58,6 +82,7 @@ public class BacteriaSpawner : MonoBehaviour
         foreach (ZoneData data in zones.Values)
         {
             data.currentCount = 0;
+            data.aliveCount = 0;
             data.spawnTimer = 0f;
             data.isFullySpawned = false;
         }
@@ -91,6 +116,7 @@ public class BacteriaSpawner : MonoBehaviour
             data.zone = zone;
             data.transform = mouthZoneManager.GetZoneTransform(zone);
             data.currentCount = 0;
+            data.aliveCount = 0;
             data.maxCount = bacteriaPerZone;
             data.spawnTimer = 0f;
             data.isFullySpawned = false;
@@ -118,6 +144,7 @@ public class BacteriaSpawner : MonoBehaviour
             return;
 
         sessionTimer += Time.deltaTime;
+        secondsIntoCurrentStep += Time.deltaTime;
 
         BrushZone activeZone = sessionManager.CurrentZone;
 
@@ -134,44 +161,80 @@ public class BacteriaSpawner : MonoBehaviour
             if (data.transform == null)
                 continue;
 
-            // Only the current brushing step receives timeline spawns; otherwise every zone
-            // advances with sessionTimer and refills while the player cleans the active zone.
-            if (zone != activeZone)
-                continue;
+            int expectedCount = GetExpectedSpawnCountForZone(data, zone == activeZone);
+            expectedCount = Mathf.Min(expectedCount, data.maxCount);
 
-            float expectedProgress = Mathf.Clamp01(sessionTimer / data.targetFillTime);
-
-            int expectedCount = Mathf.FloorToInt(expectedProgress * data.maxCount);
-
-            if (data.currentCount < expectedCount)
+            bool isActiveZone = zone == activeZone;
+            int budget = isActiveZone ? Mathf.Max(1, activeZoneMaxSpawnsPerFrame) : 1;
+            int spawnedBurst = 0;
+            while (data.currentCount < expectedCount && spawnedBurst < budget)
             {
-                SpawnBacteriaInZone(data.transform, zone);
-                data.currentCount++;
-
-                Debug.Log("[TimelineSpawn] " + zone +
-                          " | expected: " + expectedCount +
-                          " | current: " + data.currentCount);
+                SpawnBacteriaInZone(data, zone, activeZone);
+                spawnedBurst++;
             }
         }
     }
 
-    void SpawnBacteriaInZone(Transform zoneTransform, BrushZone zone)
+    static int BackgroundExpectedCount(ZoneData data, float sessionTimer)
     {
+        float p = Mathf.Clamp01(sessionTimer / data.targetFillTime);
+        if (p >= 1f)
+            return data.maxCount;
+        return Mathf.FloorToInt(p * data.maxCount);
+    }
+
+    int FocusExpectedCountForActiveStep(ZoneData data)
+    {
+        float dur = Mathf.Max(0.01f, activeZoneRampDuration);
+        float p = Mathf.Clamp01(secondsIntoCurrentStep / dur);
+        if (p >= 1f)
+            return data.maxCount;
+        return Mathf.FloorToInt(p * data.maxCount);
+    }
+
+    int GetExpectedSpawnCountForZone(ZoneData data, bool isCurrentStepZone)
+    {
+        int background = BackgroundExpectedCount(data, sessionTimer);
+        if (!isCurrentStepZone)
+            return background;
+        return Mathf.Max(background, FocusExpectedCountForActiveStep(data));
+    }
+
+    void RefreshBacteriaTargetHighlights()
+    {
+        if (sessionManager == null)
+            return;
+
+        BrushZone active = sessionManager.CurrentZone;
+        for (int i = 0; i < spawnedBacteria.Count; i++)
+        {
+            GameObject go = spawnedBacteria[i];
+            if (go == null)
+                continue;
+            Bacteria b = go.GetComponentInChildren<Bacteria>(true);
+            if (b == null)
+                continue;
+            b.ApplyTargetHighlight(b.Zone == active);
+        }
+    }
+
+    void SpawnBacteriaInZone(ZoneData data, BrushZone zone, BrushZone currentHighlightZone)
+    {
+        Transform zoneTransform = data.transform;
         if (bacteriaPrefab == null || zoneTransform == null)
             return;
 
         GameObject bacteria = Instantiate(bacteriaPrefab);
 
-        Bacteria b = bacteria.GetComponent<Bacteria>();
+        Bacteria b = bacteria.GetComponentInChildren<Bacteria>(true);
         if (b == null)
         {
-            Debug.LogError("Bacteria prefab missing Bacteria script!");
+            Debug.LogError("Bacteria prefab missing Bacteria script (on root or children)!");
             Destroy(bacteria);
             return;
         }
 
-        b.Initialize(zone);
-        Debug.Log("[Spawner] Spawned bacteria in zone: " + zone);
+        b.Initialize(this, zone);
 
         float radius = 0.02f;
         Vector2 random2D = UnityEngine.Random.insideUnitCircle * radius;
@@ -188,8 +251,25 @@ public class BacteriaSpawner : MonoBehaviour
 
         bacteria.transform.SetParent(zoneTransform, true);
 
+        b.ApplyTargetHighlight(zone == currentHighlightZone);
+
+        data.currentCount++;
+        data.aliveCount++;
         spawnedBacteria.Add(bacteria);
         ScoreManager.instance?.RegisterSpawn();
+    }
+
+    internal bool IsSessionClearInProgress => sessionClearInProgress;
+
+    internal void NotifyBacteriaDestroyed(BrushZone zone)
+    {
+        if (sessionClearInProgress)
+            return;
+
+        if (!zones.TryGetValue(zone, out ZoneData data))
+            return;
+
+        data.aliveCount = Mathf.Max(0, data.aliveCount - 1);
     }
 
     public int GetSpawnedCount(BrushZone zone)
@@ -197,31 +277,15 @@ public class BacteriaSpawner : MonoBehaviour
         if (!zones.TryGetValue(zone, out ZoneData data))
             return 0;
 
-        int n = data.currentCount;
-        Debug.Log("[BacteriaSpawner] GetSpawnedCount " + zone + ": " + n);
-        return n;
+        return data.currentCount;
     }
 
     public int GetRemainingCount(BrushZone zone)
     {
-        Bacteria[] all = FindObjectsOfType<Bacteria>();
+        if (!zones.TryGetValue(zone, out ZoneData data))
+            return 0;
 
-        int count = 0;
-
-        foreach (var b in all)
-        {
-            if (b == null)
-                continue;
-
-            Debug.Log("[Check] Bacteria zone: " + b.Zone + " | Checking for: " + zone);
-
-            if (b.Zone == zone)
-                count++;
-        }
-
-        Debug.Log("[RemainingCount] Zone: " + zone + " | Count: " + count);
-
-        return count;
+        return data.aliveCount;
     }
 
     public int GetMaxCount(BrushZone zone)
@@ -237,9 +301,7 @@ public class BacteriaSpawner : MonoBehaviour
         if (!zones.TryGetValue(zone, out ZoneData data))
             return false;
 
-        bool full = data.currentCount >= data.maxCount;
-        Debug.Log("[BacteriaSpawner] IsZoneFullySpawned " + zone + ": " + full);
-        return full;
+        return data.currentCount >= data.maxCount;
     }
 
     public bool IsZoneComplete(BrushZone zone)
@@ -247,15 +309,8 @@ public class BacteriaSpawner : MonoBehaviour
         if (!zones.TryGetValue(zone, out ZoneData data))
             return false;
 
-        int remaining = GetRemainingCount(zone);
-        bool complete = data.currentCount >= data.maxCount && remaining == 0;
-
-        Debug.Log("[ZoneCheck] " + zone +
-                  " | spawned: " + data.currentCount +
-                  " | max: " + data.maxCount +
-                  " | remaining: " + remaining);
-
-        return complete;
+        int remaining = data.aliveCount;
+        return data.currentCount >= data.maxCount && remaining == 0;
     }
 
     void ClearSpawnedBacteria()

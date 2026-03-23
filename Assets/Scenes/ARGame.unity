@@ -337,6 +337,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sessionManager: {fileID: 1446861475}
   mouthZoneManager: {fileID: 0}
+  bacteriaSpawner: {fileID: 0}
   brushRoot: {fileID: 734737003}
   distanceFromCamera: 0.3
   positionSmoothSpeed: 15
@@ -1209,6 +1210,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreText: {fileID: 719736176}
+  pointsCorrectTargetZone: 2
+  pointsWrongZoneWhileTargetHasWork: -1
 --- !u!4 &1446861474
 Transform:
   m_ObjectHideFlags: 0
@@ -1238,25 +1241,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sessionSteps:
   - zone: 0
-    duration: 10
+    duration: 20
     instructionText: Limpia tus dientes superiores izquierdos!
   - zone: 1
-    duration: 10
+    duration: 20
     instructionText: Limpia tus dientes superiores derechos!
   - zone: 3
-    duration: 10
+    duration: 20
     instructionText: Limpia tus dientes inferiores izquierdos!
   - zone: 4
-    duration: 10
+    duration: 20
     instructionText: Limpia tus dientes inferiores derechos!
   - zone: 5
-    duration: 10
+    duration: 20
     instructionText: Limpia tus dientes inferiores!
   - zone: 2
-    duration: 10
+    duration: 20
     instructionText: Limpia tus dientes superiores!
   autoStart: 1
-  bacteriaThresholdToComplete: 2
+  bacteriaSpawner: {fileID: 1760943327}
   onStepChangedUnity:
     m_PersistentCalls:
       m_Calls: []
@@ -1360,9 +1363,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bacteriaPrefab: {fileID: 4848965092817389470, guid: 1d5da33c1f103b845abd4ba79eba74d7, type: 3}
   sessionManager: {fileID: 1446861475}
-  bacteriaPerZone: 8
-  activeSpawnTime: 20
-  inactiveSpawnMultiplier: 0.5
+  bacteriaPerZone: 20
+  activeZoneRampDuration: 12
+  activeZoneMaxSpawnsPerFrame: 4
 --- !u!4 &1760943328
 Transform:
   m_ObjectHideFlags: 0

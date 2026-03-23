@@ -4,6 +4,7 @@ public class VirtualBrushController : MonoBehaviour
 {
     [SerializeField] SessionManager sessionManager;
     [SerializeField] MouthZoneManager mouthZoneManager;
+    [SerializeField] BacteriaSpawner bacteriaSpawner;
     [Tooltip("Optional: object to SetActive when session runs. If unset, Renderers on this object are toggled instead (keeps this script running).")]
     [SerializeField] GameObject brushRoot;
 
@@ -12,6 +13,12 @@ public class VirtualBrushController : MonoBehaviour
     [SerializeField] float cleaningRadius = 0.02f;
 
     bool brushShown = true;
+
+    void Awake()
+    {
+        if (bacteriaSpawner == null)
+            bacteriaSpawner = FindObjectOfType<BacteriaSpawner>();
+    }
 
     void Update()
     {
@@ -66,6 +73,11 @@ public class VirtualBrushController : MonoBehaviour
         Vector3 brushLocal = zone.InverseTransformPoint(transform.position);
         Vector2 brushPos2D = new Vector2(brushLocal.x, brushLocal.y);
 
+        BrushZone targetZone = sessionManager.CurrentZone;
+        bool targetStillHasWork = bacteriaSpawner != null &&
+                                  (bacteriaSpawner.GetRemainingCount(targetZone) > 0 ||
+                                   !bacteriaSpawner.IsZoneFullySpawned(targetZone));
+
         GameObject[] bacteriaObjects = GameObject.FindGameObjectsWithTag("Bacteria");
         for (int i = 0; i < bacteriaObjects.Length; i++)
         {
@@ -79,8 +91,9 @@ public class VirtualBrushController : MonoBehaviour
 
             if (distance < cleaningRadius)
             {
-                if (bacteria.TryGetComponent<Bacteria>(out Bacteria cleanable))
-                    cleanable.Clean(Time.deltaTime);
+                Bacteria cleanable = bacteria.GetComponentInChildren<Bacteria>(true);
+                if (cleanable != null)
+                    cleanable.Clean(Time.deltaTime, targetZone, targetStillHasWork);
             }
         }
     }

@@ -58,11 +58,28 @@ public class SessionManager : MonoBehaviour
 
     public UnityEvent<string> OnInstructionChanged = new UnityEvent<string>();
 
+    void Awake()
+    {
+        EnsureBacteriaSpawnerReference();
+    }
+
     void Start()
     {
+        EnsureBacteriaSpawnerReference();
         PopulateDefaultStepsIfEmpty();
         if (autoStart)
             StartSession();
+    }
+
+    void EnsureBacteriaSpawnerReference()
+    {
+        if (bacteriaSpawner != null)
+            return;
+
+        bacteriaSpawner = FindObjectOfType<BacteriaSpawner>();
+        if (bacteriaSpawner == null)
+            Debug.LogError(
+                "[SessionManager] No BacteriaSpawner assigned or found. Zone completion and step progression will not run. Assign the BacteriaSpawner on GameManager or add one to the scene.");
     }
 
     void Update()
@@ -71,30 +88,19 @@ public class SessionManager : MonoBehaviour
         {
             debugCurrentStepIndex = currentStepIndex;
             debugRemainingTime = stepTimer;
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (!IsSessionRunning)
             return;
-        }
 
-        if (bacteriaSpawner != null)
-        {
-            BrushZone currentZone = CurrentZone;
-            Debug.Log("[SessionCheck] " + currentZone +
-                      " | remaining: " + bacteriaSpawner.GetRemainingCount(currentZone));
-            Debug.Log("[SessionManager] Checking zone: " + currentZone);
+        if (bacteriaSpawner == null)
+            return;
 
-            bool isFull = bacteriaSpawner.IsZoneFullySpawned(currentZone);
-            int remaining = bacteriaSpawner.GetRemainingCount(currentZone);
-            int max = bacteriaSpawner.GetMaxCount(currentZone);
-
-            Debug.Log("[SessionManager] Zone: " + currentZone +
-                      " | Full: " + isFull +
-                      " | Remaining: " + remaining +
-                      " | Max: " + max);
-
-            bool zoneComplete = bacteriaSpawner.IsZoneComplete(currentZone);
-            Debug.Log("[SessionManager] Zone " + currentZone + " complete? " + zoneComplete);
-            if (zoneComplete)
-                AdvanceToNextStep();
-        }
+        if (bacteriaSpawner.IsZoneComplete(CurrentZone))
+            AdvanceToNextStep();
 
         debugCurrentStepIndex = currentStepIndex;
         debugRemainingTime = stepTimer;
