@@ -2,47 +2,46 @@ using UnityEngine;
 
 public class Bacteria : MonoBehaviour
 {
-    const float MotionCleanDistance = 2f;
+    public BrushZone Zone { get; private set; }
 
-    void Update()
+    [SerializeField] private float maxHealth = 1.0f;
+    [SerializeField] private float cleanSpeed = 2.0f;
+
+    private float currentHealth;
+    private Vector3 initialScale;
+    bool deathScored;
+
+    public void Initialize(BrushZone zone)
     {
-        if (Camera.main == null)
-            return;
-
-        if (MotionDetector.instance != null && MotionDetector.instance.isMotionDetected)
-        {
-            float distance = Vector3.Distance(Camera.main.transform.position, transform.position);
-            if (distance < MotionCleanDistance)
-            {
-                if (ScoreManager.instance != null)
-                    ScoreManager.instance.AddScore(1);
-                Destroy(gameObject);
-                return;
-            }
-        }
-
-        Vector2 screenPos = GetInputScreenPosition();
-        if (screenPos.x < 0)
-            return;
-
-        Ray ray = Camera.main.ScreenPointToRay(screenPos);
-        if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject == gameObject)
-        {
-            if (ScoreManager.instance != null)
-                ScoreManager.instance.AddScore(1);
-            Destroy(gameObject);
-        }
+        Zone = zone;
+        Debug.Log("[Bacteria] Initialized with zone: " + zone);
     }
 
-    Vector2 GetInputScreenPosition()
+    void Start()
     {
-#if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0))
-            return Input.mousePosition;
-#endif
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-            return Input.GetTouch(0).position;
+        initialScale = transform.localScale;
+        currentHealth = maxHealth;
+    }
 
-        return new Vector2(-1f, -1f);
+    public void Clean(float deltaTime)
+    {
+        currentHealth -= cleanSpeed * deltaTime;
+
+        float normalized = Mathf.Clamp01(currentHealth / maxHealth);
+        transform.localScale = initialScale * normalized;
+
+        if (currentHealth <= 0)
+        {
+            if (!deathScored)
+            {
+                deathScored = true;
+                ScoreManager.instance?.RegisterClean();
+                ScoreManager.instance?.AddScore(1);
+            }
+
+            Debug.Log("[Bacteria] Destroyed in zone: " + Zone);
+
+            Destroy(gameObject);
+        }
     }
 }
