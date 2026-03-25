@@ -1,8 +1,18 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class BrushController : MonoBehaviour
 {
+
+    public Vector3 normalScale = new Vector3(0.9f,0.9f,0.9f);
+    public Vector3 zoomScale = new Vector3(0.01f,0.01f,0.01f);
+
+    public void SetZoomMode(bool isZoom)
+    {
+        transform.localScale = isZoom ? zoomScale : normalScale;
+    }
+
     void Update()
     {
         Vector2 mouse = Mouse.current.position.ReadValue();

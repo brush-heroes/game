@@ -7,11 +7,15 @@ public class CameraTestInput : MonoBehaviour
 
     public StageTimer stageTimer;
 
+    public BrushController brush;
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             cameraController.GoToNormalView();
+
+            brush.SetZoomMode(false);
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -29,8 +33,11 @@ public class CameraTestInput : MonoBehaviour
     {
         cameraController.GoToOutsideZoomView();
 
+        brush.SetZoomMode(true);
+
         yield return new WaitForSeconds(1.1f);
 
         stageTimer.StartTimer(10f);
+
     }
 }

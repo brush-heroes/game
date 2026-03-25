@@ -1,5 +1,5 @@
 using UnityEngine;
-using TMPro; // si usas TextMeshPro
+using TMPro; 
 
 public class StageTimer : MonoBehaviour
 {
@@ -38,7 +38,7 @@ public class StageTimer : MonoBehaviour
     {
         Debug.Log("Tiempo terminado");
 
-        StopTimer(); // 🔥 esto lo apaga automáticamente
+        StopTimer();
     }
 
     public void StartTimer(float duration)

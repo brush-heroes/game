@@ -24,7 +24,7 @@ public class BrushGameManager : MonoBehaviour
 
     private void Start()
     {
-        // Empezamos con Chewing derecho
+        
         currentType = ZoneType.Chewing;
         currentSide = ZoneSide.Right;
     }
@@ -108,7 +108,6 @@ void NextStep()
 
         Debug.Log("🎉 TERMINASTE TODO EL CEPILLADO 🎉");
 
-        // aquí luego puedes poner victoria
     }
 }
 }
