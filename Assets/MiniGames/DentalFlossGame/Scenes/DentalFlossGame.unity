@@ -966,6 +966,58 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1212393572}
   m_CullTransparentMesh: 1
+--- !u!1 &1347506863
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1347506865}
+  - component: {fileID: 1347506864}
+  m_Layer: 0
+  m_Name: TeethProgression
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1347506864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347506863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1947ed861dae0284aaf2983f6a6d20d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dirtyTeeth: {fileID: 21300000, guid: af586ddd28a38614da782ccff2f1e5c0, type: 3}
+  mediumTeeth: {fileID: 21300000, guid: acb88d86e0cfea644b9195499a44d78a, type: 3}
+  cleanTeeth: {fileID: 21300000, guid: 297e1cb9546fff246a6289eac7562913, type: 3}
+  mediumLimit: 50
+  cleanLimit: 100
+  teethRenderers:
+  - {fileID: 3614396854683089688}
+  - {fileID: 593287736604020873}
+--- !u!4 &1347506865
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347506863}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.15036729, y: -0.06465168, z: 0.0400175}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1398372058
 GameObject:
   m_ObjectHideFlags: 0
@@ -1475,6 +1527,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5cec3f4f33ffe3246a22e76532c47187, type: 3}
+--- !u!212 &593287736604020873 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2601069978010277118, guid: 5cec3f4f33ffe3246a22e76532c47187, type: 3}
+  m_PrefabInstance: {fileID: 593287736604020872}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3614396854683089687
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1544,6 +1601,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 960b009877ba46545a0c084ef0f73df0, type: 3}
+--- !u!212 &3614396854683089688 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 5176222661039397359, guid: 960b009877ba46545a0c084ef0f73df0, type: 3}
+  m_PrefabInstance: {fileID: 3614396854683089687}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5096854197351182766
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1690,3 +1752,4 @@ SceneRoots:
   - {fileID: 5096854197351182766}
   - {fileID: 520402904}
   - {fileID: 1398372061}
+  - {fileID: 1347506865}
