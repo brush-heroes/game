@@ -13,9 +13,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Teeth
+  - Floss
+  - Dirt
   - 
   - 
   - 
@@ -66,4 +66,10 @@ TagManager:
     locked: 0
   - name: Brush
     uniqueID: 3867680607
+    locked: 0
+  - name: Gameplay
+    uniqueID: 1972347733
+    locked: 0
+  - name: UI_World
+    uniqueID: 1988620857
     locked: 0
