@@ -9,19 +9,19 @@ public class MouthZoneManager : MonoBehaviour
     [SerializeField] Transform lowerRight;
     [SerializeField] Transform frontLower;
 
-    public Transform GetTransformForZone(BrushZone zone)
+    public Transform GetTransformForZone(MouthZone zone)
     {
         return zone switch
         {
-            BrushZone.UpperLeft => upperLeft,
-            BrushZone.UpperRight => upperRight,
-            BrushZone.FrontUpper => frontUpper,
-            BrushZone.LowerLeft => lowerLeft,
-            BrushZone.LowerRight => lowerRight,
-            BrushZone.FrontLower => frontLower,
+            MouthZone.UpperLeft => upperLeft,
+            MouthZone.UpperRight => upperRight,
+            MouthZone.FrontUpper => frontUpper,
+            MouthZone.LowerLeft => lowerLeft,
+            MouthZone.LowerRight => lowerRight,
+            MouthZone.FrontLower => frontLower,
             _ => null
         };
     }
 
-    public Transform GetZoneTransform(BrushZone zone) => GetTransformForZone(zone);
+    public Transform GetZoneTransform(MouthZone zone) => GetTransformForZone(zone);
 }

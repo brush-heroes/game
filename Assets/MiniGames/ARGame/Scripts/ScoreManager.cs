@@ -42,7 +42,7 @@ public class ScoreManager : MonoBehaviour
     /// Wrong-zone cleans are only penalized while the current step's zone still has bacteria to finish
     /// (not fully spawned yet, or still alive). Cleaning another zone after the target is done is neutral.
     /// </summary>
-    public void RegisterCleanResult(BrushZone cleanedZone, BrushZone currentTargetZone, bool targetZoneStillHasWork)
+    public void RegisterCleanResult(MouthZone cleanedZone, MouthZone currentTargetZone, bool targetZoneStillHasWork)
     {
         totalCleaned++;
 

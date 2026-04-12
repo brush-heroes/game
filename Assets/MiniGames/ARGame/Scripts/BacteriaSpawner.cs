@@ -7,7 +7,7 @@ public class BacteriaSpawner : MonoBehaviour
 {
     class ZoneData
     {
-        public BrushZone zone;
+        public MouthZone zone;
         public Transform transform;
         public int currentCount;
         public int aliveCount;
@@ -30,7 +30,7 @@ public class BacteriaSpawner : MonoBehaviour
 
     MouthZoneManager mouthZoneManager;
     readonly List<GameObject> spawnedBacteria = new List<GameObject>();
-    private Dictionary<BrushZone, ZoneData> zones = new Dictionary<BrushZone, ZoneData>();
+    private Dictionary<MouthZone, ZoneData> zones = new Dictionary<MouthZone, ZoneData>();
 
     private bool isInitialized;
     private float sessionTimer;
@@ -110,7 +110,7 @@ public class BacteriaSpawner : MonoBehaviour
 
         int index = 0;
 
-        foreach (BrushZone zone in System.Enum.GetValues(typeof(BrushZone)))
+        foreach (MouthZone zone in System.Enum.GetValues(typeof(MouthZone)))
         {
             ZoneData data = new ZoneData();
             data.zone = zone;
@@ -146,11 +146,11 @@ public class BacteriaSpawner : MonoBehaviour
         sessionTimer += Time.deltaTime;
         secondsIntoCurrentStep += Time.deltaTime;
 
-        BrushZone activeZone = sessionManager.CurrentZone;
+        MouthZone activeZone = sessionManager.CurrentZone;
 
         foreach (var kvp in zones)
         {
-            BrushZone zone = kvp.Key;
+            MouthZone zone = kvp.Key;
             ZoneData data = kvp.Value;
 
             data.isFullySpawned = data.currentCount >= data.maxCount;
@@ -205,7 +205,7 @@ public class BacteriaSpawner : MonoBehaviour
         if (sessionManager == null)
             return;
 
-        BrushZone active = sessionManager.CurrentZone;
+        MouthZone active = sessionManager.CurrentZone;
         for (int i = 0; i < spawnedBacteria.Count; i++)
         {
             GameObject go = spawnedBacteria[i];
@@ -218,7 +218,7 @@ public class BacteriaSpawner : MonoBehaviour
         }
     }
 
-    void SpawnBacteriaInZone(ZoneData data, BrushZone zone, BrushZone currentHighlightZone)
+    void SpawnBacteriaInZone(ZoneData data, MouthZone zone, MouthZone currentHighlightZone)
     {
         Transform zoneTransform = data.transform;
         if (bacteriaPrefab == null || zoneTransform == null)
@@ -261,7 +261,7 @@ public class BacteriaSpawner : MonoBehaviour
 
     internal bool IsSessionClearInProgress => sessionClearInProgress;
 
-    internal void NotifyBacteriaDestroyed(BrushZone zone)
+    internal void NotifyBacteriaDestroyed(MouthZone zone)
     {
         if (sessionClearInProgress)
             return;
@@ -272,7 +272,7 @@ public class BacteriaSpawner : MonoBehaviour
         data.aliveCount = Mathf.Max(0, data.aliveCount - 1);
     }
 
-    public int GetSpawnedCount(BrushZone zone)
+    public int GetSpawnedCount(MouthZone zone)
     {
         if (!zones.TryGetValue(zone, out ZoneData data))
             return 0;
@@ -280,7 +280,7 @@ public class BacteriaSpawner : MonoBehaviour
         return data.currentCount;
     }
 
-    public int GetRemainingCount(BrushZone zone)
+    public int GetRemainingCount(MouthZone zone)
     {
         if (!zones.TryGetValue(zone, out ZoneData data))
             return 0;
@@ -288,7 +288,7 @@ public class BacteriaSpawner : MonoBehaviour
         return data.aliveCount;
     }
 
-    public int GetMaxCount(BrushZone zone)
+    public int GetMaxCount(MouthZone zone)
     {
         if (!zones.TryGetValue(zone, out ZoneData data))
             return 0;
@@ -296,7 +296,7 @@ public class BacteriaSpawner : MonoBehaviour
         return data.maxCount;
     }
 
-    public bool IsZoneFullySpawned(BrushZone zone)
+    public bool IsZoneFullySpawned(MouthZone zone)
     {
         if (!zones.TryGetValue(zone, out ZoneData data))
             return false;
@@ -304,7 +304,7 @@ public class BacteriaSpawner : MonoBehaviour
         return data.currentCount >= data.maxCount;
     }
 
-    public bool IsZoneComplete(BrushZone zone)
+    public bool IsZoneComplete(MouthZone zone)
     {
         if (!zones.TryGetValue(zone, out ZoneData data))
             return false;

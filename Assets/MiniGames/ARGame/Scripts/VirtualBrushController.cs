@@ -73,7 +73,7 @@ public class VirtualBrushController : MonoBehaviour
         Vector3 brushLocal = zone.InverseTransformPoint(transform.position);
         Vector2 brushPos2D = new Vector2(brushLocal.x, brushLocal.y);
 
-        BrushZone targetZone = sessionManager.CurrentZone;
+        MouthZone targetZone = sessionManager.CurrentZone;
         bool targetStillHasWork = bacteriaSpawner != null &&
                                   (bacteriaSpawner.GetRemainingCount(targetZone) > 0 ||
                                    !bacteriaSpawner.IsZoneFullySpawned(targetZone));

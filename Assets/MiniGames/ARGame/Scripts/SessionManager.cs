@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public enum BrushZone
+public enum MouthZone
 {
     UpperLeft,
     UpperRight,
@@ -16,7 +16,7 @@ public enum BrushZone
 [Serializable]
 public struct SessionStep
 {
-    public BrushZone zone;
+    public MouthZone zone;
     public float duration;
     public string instructionText;
 }
@@ -46,8 +46,8 @@ public class SessionManager : MonoBehaviour
     public bool IsSessionRunning { get; private set; }
 
     public int CurrentStepIndex => currentStepIndex;
-    public BrushZone CurrentActiveZone => GetCurrentStep().zone;
-    public BrushZone CurrentZone => CurrentActiveZone;
+    public MouthZone CurrentActiveZone => GetCurrentStep().zone;
+    public MouthZone CurrentZone => CurrentActiveZone;
     public string CurrentInstructionText => GetCurrentStep().instructionText;
     public float RemainingTime => Mathf.Max(0f, stepTimer);
     public bool IsSessionComplete { get; private set; }
@@ -192,7 +192,7 @@ public class SessionManager : MonoBehaviour
         return sessionSteps[currentStepIndex];
     }
 
-    static string EnsureNonEmptyInstruction(string text, BrushZone zone)
+    static string EnsureNonEmptyInstruction(string text, MouthZone zone)
     {
         if (!string.IsNullOrEmpty(text))
             return text;
@@ -206,18 +206,18 @@ public class SessionManager : MonoBehaviour
 
         sessionSteps = new List<SessionStep>
         {
-            NewDefaultStep(BrushZone.UpperLeft, "Brush your upper left teeth!"),
-            NewDefaultStep(BrushZone.UpperRight, "Brush your upper right teeth!"),
-            NewDefaultStep(BrushZone.FrontUpper, "Brush the front of your upper teeth!"),
-            NewDefaultStep(BrushZone.LowerLeft, "Brush your lower left teeth!"),
-            NewDefaultStep(BrushZone.LowerRight, "Brush your lower right teeth!"),
-            NewDefaultStep(BrushZone.FrontLower, "Brush the front of your lower teeth!")
+            NewDefaultStep(MouthZone.UpperLeft, "Brush your upper left teeth!"),
+            NewDefaultStep(MouthZone.UpperRight, "Brush your upper right teeth!"),
+            NewDefaultStep(MouthZone.FrontUpper, "Brush the front of your upper teeth!"),
+            NewDefaultStep(MouthZone.LowerLeft, "Brush your lower left teeth!"),
+            NewDefaultStep(MouthZone.LowerRight, "Brush your lower right teeth!"),
+            NewDefaultStep(MouthZone.FrontLower, "Brush the front of your lower teeth!")
         };
 
         Debug.Log("[SessionManager] Populated default session steps (duration unused; steps advance per active zone completion).");
     }
 
-    static SessionStep NewDefaultStep(BrushZone zone, string instruction)
+    static SessionStep NewDefaultStep(MouthZone zone, string instruction)
     {
         return new SessionStep
         {

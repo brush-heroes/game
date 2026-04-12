@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Bacteria : MonoBehaviour
 {
-    public BrushZone Zone { get; private set; }
+    public MouthZone Zone { get; private set; }
 
     [SerializeField] private float maxHealth = 1.0f;
     [SerializeField] private float cleanSpeed = 2.0f;
@@ -23,7 +23,7 @@ public class Bacteria : MonoBehaviour
     Color[] meshBaseColors;
     bool visualsCached;
 
-    public void Initialize(BacteriaSpawner spawner, BrushZone zone)
+    public void Initialize(BacteriaSpawner spawner, MouthZone zone)
     {
         ownerSpawner = spawner;
         Zone = zone;
@@ -110,7 +110,7 @@ public class Bacteria : MonoBehaviour
         initialScale = transform.localScale;
     }
 
-    public void Clean(float deltaTime, BrushZone currentTargetZone, bool penalizeWrongZoneClean)
+    public void Clean(float deltaTime, MouthZone currentTargetZone, bool penalizeWrongZoneClean)
     {
         if (initialScale == Vector3.zero)
             initialScale = transform.localScale;
