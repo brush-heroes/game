@@ -4,15 +4,22 @@ using UnityEngine;
 
 public class Dirt : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        
-    }
+        if (collision.CompareTag("Player"))
+        {
+            FlossController floss = collision.GetComponentInParent<FlossController>();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            if (floss != null && floss.isMovingUp)
+            {
+                GameManager.Instance.AddScore(10);
+                Debug.Log("Clean!");
+                Destroy(gameObject);
+            }
+            else
+            {
+                Debug.Log("Wrong!");
+            }
+        }
     }
 }

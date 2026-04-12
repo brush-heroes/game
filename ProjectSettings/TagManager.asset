@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Brush
+  - Dirt
+  - Bacteria
   layers:
   - Default
   - TransparentFX
@@ -11,9 +14,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Teeth
+  - Floss
+  - Dirt
   - 
   - 
   - 
@@ -40,4 +43,34 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Mouth
+    uniqueID: 2376077999
+    locked: 0
+  - name: Teeth
+    uniqueID: 1165797547
+    locked: 0
+  - name: Background
+    uniqueID: 234878275
+    locked: 0
+  - name: Brush
+    uniqueID: 2821665179
+    locked: 0
+  - name: Tongue
+    uniqueID: 1271515675
+    locked: 0
+  - name: pizza
+    uniqueID: 3878656541
+    locked: 0
+  - name: peperoni
+    uniqueID: 1293351701
+    locked: 0
+  - name: Brush
+    uniqueID: 3867680607
+    locked: 0
+  - name: Gameplay
+    uniqueID: 1972347733
+    locked: 0
+  - name: UI_World
+    uniqueID: 1988620857
     locked: 0
