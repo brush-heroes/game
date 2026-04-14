@@ -7,8 +7,9 @@ public class StageTimer : MonoBehaviour
     public bool isRunning = false;
 
     public TextMeshProUGUI timerText;
-
     public GameObject timerUI;
+
+    public BushingDirtSpawner dirtSpawner;
 
     void Update()
     {
@@ -20,7 +21,9 @@ public class StageTimer : MonoBehaviour
         {
             timeLeft = 0;
             isRunning = false;
+            UpdateUI();
             OnTimeEnd();
+            return;
         }
 
         UpdateUI();
@@ -39,6 +42,11 @@ public class StageTimer : MonoBehaviour
         Debug.Log("Tiempo terminado");
 
         StopTimer();
+
+        if (dirtSpawner != null)
+        {
+            dirtSpawner.StopSpawning();
+        }
     }
 
     public void StartTimer(float duration)
@@ -48,6 +56,8 @@ public class StageTimer : MonoBehaviour
 
         if (timerUI != null)
             timerUI.SetActive(true);
+
+        UpdateUI();
     }
 
     public void StopTimer()
@@ -57,5 +67,4 @@ public class StageTimer : MonoBehaviour
         if (timerUI != null)
             timerUI.SetActive(false);
     }
-
 }
