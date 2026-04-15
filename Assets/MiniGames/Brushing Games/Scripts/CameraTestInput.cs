@@ -9,7 +9,6 @@ public class CameraTestInput : MonoBehaviour
 
     public BrushController brush;
 
-    public BushingDirtSpawner dirtSpawner;
 
     private void Update()
     {
@@ -22,27 +21,42 @@ public class CameraTestInput : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            StartCoroutine(StartOutsideWithDelay());
+            StartCoroutine(StartRightWithDelay());
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            cameraController.GoToInsideZoomView();
+            StartCoroutine(StartLeftWithDelay());
         }
     }
 
-private IEnumerator StartOutsideWithDelay()
+private IEnumerator StartRightWithDelay()
 {
     cameraController.GoToOutsideZoomView();
 
     yield return new WaitForSeconds(1.1f);
 
-    stageTimer.StartTimer(10f);
     brush.SetZoomMode(true);
 
-    if (dirtSpawner != null)
+    if (stageTimer != null)
     {
-        dirtSpawner.StartSpawning();
+        stageTimer.StartRightSequence();
     }
 }
+
+private IEnumerator StartLeftWithDelay()
+{
+    cameraController.GoToLeftOutsideZoomView();
+
+    yield return new WaitForSeconds(1.1f);
+
+    brush.SetZoomMode(true);
+
+    if (stageTimer != null)
+    {
+        stageTimer.StartLeftSequence();
+    }
+}
+
+
 }
