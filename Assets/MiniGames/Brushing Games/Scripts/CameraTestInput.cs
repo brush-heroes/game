@@ -8,7 +8,8 @@ public class CameraTestInput : MonoBehaviour
     public StageTimer stageTimer;
 
     public BrushController brush;
-
+    public TongueGameManager tongueGameManager;
+    public GameObject brushOff;
 
     private void Update()
     {
@@ -28,6 +29,13 @@ public class CameraTestInput : MonoBehaviour
         {
             StartCoroutine(StartLeftWithDelay());
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            StartCoroutine(StartTongueWithDelay());
+            
+        }
+
     }
 
 private IEnumerator StartRightWithDelay()
@@ -57,6 +65,18 @@ private IEnumerator StartLeftWithDelay()
         stageTimer.StartLeftSequence();
     }
 }
+private IEnumerator StartTongueWithDelay()
+{
+    if (brushOff != null)
+        brushOff.SetActive(false);
+
+    cameraController.GoToTongueZoomView();
+
+    yield return new WaitForSeconds(1.1f);
+
+    tongueGameManager.StartTongueGame();
+}
+
 
 
 }

@@ -53,11 +53,11 @@ TagManager:
   - name: Background
     uniqueID: 234878275
     locked: 0
-  - name: Brush
-    uniqueID: 2821665179
-    locked: 0
   - name: Tongue
     uniqueID: 1271515675
+    locked: 0
+  - name: Brush
+    uniqueID: 2821665179
     locked: 0
   - name: pizza
     uniqueID: 3878656541

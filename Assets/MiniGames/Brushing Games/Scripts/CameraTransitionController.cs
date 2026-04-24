@@ -9,11 +9,14 @@ public class CameraTransitionController : MonoBehaviour
     public Transform normalView;
     public Transform outsideZoomView;
     public Transform OutsideLeftZoomView;
+    public Transform TongueZoomView;
+
 
     [Header("Zoom Sizes")]
     public float normalSize = 5f;
     public float outsideZoomSize = 3f;
     public float outsideZoomSizeLeft = 3f;
+    public float tongueZoomSize = 3f;
 
     [Header("Speed")]
     public float moveDuration = 1f;
@@ -39,6 +42,10 @@ public class CameraTransitionController : MonoBehaviour
     public void GoToLeftOutsideZoomView()
     {
         StartTransition(OutsideLeftZoomView, outsideZoomSizeLeft);
+    }
+    public void GoToTongueZoomView()
+    {
+        StartTransition(TongueZoomView, tongueZoomSize);
     }
 
     private void StartTransition(Transform target, float targetSize)
