@@ -14,6 +14,7 @@ public class CameraTransitionController : MonoBehaviour
 
     [Header("Zoom Sizes")]
     public float normalSize = 5f;
+    public float initialStartSize = 10f;
     public float outsideZoomSize = 3f;
     public float outsideZoomSizeLeft = 3f;
     public float tongueZoomSize = 3f;
@@ -27,6 +28,24 @@ public class CameraTransitionController : MonoBehaviour
     {
         if (mainCamera == null)
             mainCamera = Camera.main;
+    }
+
+    private void Start()
+    {
+        if (mainCamera == null)
+            return;
+
+        if (normalView != null)
+        {
+            Vector3 startPos = new Vector3(
+                normalView.position.x,
+                normalView.position.y,
+                mainCamera.transform.position.z
+            );
+            mainCamera.transform.position = startPos;
+        }
+
+        mainCamera.orthographicSize = initialStartSize;
     }
 
     public void GoToNormalView()

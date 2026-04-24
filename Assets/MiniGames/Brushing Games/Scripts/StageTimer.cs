@@ -1,9 +1,13 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using TMPro;
 
 public class StageTimer : MonoBehaviour
 {
+    public event Action RightSequenceCompleted;
+    public event Action LeftSequenceCompleted;
+
     public float timeLeft = 10f;
     public bool isRunning = false;
 
@@ -98,6 +102,7 @@ public class StageTimer : MonoBehaviour
             SetStageActive(insideStageRight, false);
 
             Debug.Log("Secuencia derecha terminada");
+            RightSequenceCompleted?.Invoke();
         }
     }
 
@@ -119,6 +124,7 @@ public class StageTimer : MonoBehaviour
             SetStageActive(insideStageLeft, false);
 
             Debug.Log("Secuencia izquierda terminada");
+            LeftSequenceCompleted?.Invoke();
         }
     }
 

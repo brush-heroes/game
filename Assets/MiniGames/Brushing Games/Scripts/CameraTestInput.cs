@@ -10,6 +10,39 @@ public class CameraTestInput : MonoBehaviour
     public BrushController brush;
     public TongueGameManager tongueGameManager;
     public GameObject brushOff;
+    public GameObject mouth;
+    public GameObject ninoSucio;
+    private bool tongueSequenceStarted;
+
+    private void Start()
+    {
+        if (BrushGameManager.Instance != null)
+        {
+            BrushGameManager.Instance.RightSideCompleted += HandleRightSideCompleted;
+            BrushGameManager.Instance.LeftSideCompleted += HandleLeftSideCompleted;
+        }
+
+        if (stageTimer != null)
+        {
+            stageTimer.RightSequenceCompleted += HandleRightSequenceCompleted;
+            stageTimer.LeftSequenceCompleted += HandleLeftSequenceCompleted;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (BrushGameManager.Instance != null)
+        {
+            BrushGameManager.Instance.RightSideCompleted -= HandleRightSideCompleted;
+            BrushGameManager.Instance.LeftSideCompleted -= HandleLeftSideCompleted;
+        }
+
+        if (stageTimer != null)
+        {
+            stageTimer.RightSequenceCompleted -= HandleRightSequenceCompleted;
+            stageTimer.LeftSequenceCompleted -= HandleLeftSequenceCompleted;
+        }
+    }
 
     private void Update()
     {
@@ -18,65 +51,88 @@ public class CameraTestInput : MonoBehaviour
             cameraController.GoToNormalView();
 
             brush.SetZoomMode(false);
-        }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            StartCoroutine(StartRightWithDelay());
+            if (ninoSucio != null)
+                ninoSucio.SetActive(false);
+        
         }
-
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            StartCoroutine(StartLeftWithDelay());
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            StartCoroutine(StartTongueWithDelay());
-            
-        }
-
     }
 
-private IEnumerator StartRightWithDelay()
-{
-    cameraController.GoToOutsideZoomView();
-
-    yield return new WaitForSeconds(1.1f);
-
-    brush.SetZoomMode(true);
-
-    if (stageTimer != null)
+    private void HandleRightSideCompleted()
     {
-        stageTimer.StartRightSequence();
+        StartCoroutine(StartRightWithDelay());
     }
-}
 
-private IEnumerator StartLeftWithDelay()
-{
-    cameraController.GoToLeftOutsideZoomView();
-
-    yield return new WaitForSeconds(1.1f);
-
-    brush.SetZoomMode(true);
-
-    if (stageTimer != null)
+    private void HandleLeftSideCompleted()
     {
-        stageTimer.StartLeftSequence();
+        StartCoroutine(StartLeftWithDelay());
     }
-}
-private IEnumerator StartTongueWithDelay()
-{
-    if (brushOff != null)
-        brushOff.SetActive(false);
 
-    cameraController.GoToTongueZoomView();
+    private void HandleRightSequenceCompleted()
+    {
+        ReturnToNormalView();
+    }
 
-    yield return new WaitForSeconds(1.1f);
+    private void HandleLeftSequenceCompleted()
+    {
+        if (tongueSequenceStarted)
+            return;
 
-    tongueGameManager.StartTongueGame();
-}
+        tongueSequenceStarted = true;
+        StartCoroutine(ReturnThenStartTongue());
+    }
 
+    private void ReturnToNormalView()
+    {
+        cameraController.GoToNormalView();
+        brush.SetZoomMode(false);
+    }
 
+    private IEnumerator ReturnThenStartTongue()
+    {
+        ReturnToNormalView();
+        yield return new WaitForSeconds(1.1f);
+        yield return StartCoroutine(StartTongueWithDelay());
+    }
+
+    private IEnumerator StartRightWithDelay()
+    {
+        cameraController.GoToOutsideZoomView();
+
+        yield return new WaitForSeconds(1.1f);
+
+        brush.SetZoomMode(true);
+
+        if (stageTimer != null)
+        {
+            stageTimer.StartRightSequence();
+        }
+    }
+
+    private IEnumerator StartLeftWithDelay()
+    {
+        cameraController.GoToLeftOutsideZoomView();
+
+        yield return new WaitForSeconds(1.1f);
+
+        brush.SetZoomMode(true);
+
+        if (stageTimer != null)
+        {
+            stageTimer.StartLeftSequence();
+        }
+    }
+
+    private IEnumerator StartTongueWithDelay()
+    {
+        if (brushOff != null)
+            brushOff.SetActive(false);
+
+        cameraController.GoToTongueZoomView();
+
+        yield return new WaitForSeconds(1.1f);
+
+        tongueGameManager.StartTongueGame();
+    }
 
 }
