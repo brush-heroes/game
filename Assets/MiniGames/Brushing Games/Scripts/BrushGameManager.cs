@@ -69,7 +69,7 @@ void NextStep()
     {
         insideRightGroup.SetActive(false);
 
-        Debug.Log("Terminaste lado derecho 🔥");
+        Debug.Log("Terminaste lado derecho");
 
         // PASAR A IZQUIERDA
         chewingLeftGroup.SetActive(true);
