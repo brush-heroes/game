@@ -4127,7 +4127,7 @@ MonoBehaviour:
   TongueZoomView: {fileID: 1968234316}
   normalSize: 7
   initialStartSize: 11
-  outsideZoomSize: 2
+  outsideZoomSize: 3
   outsideZoomSizeLeft: 3
   tongueZoomSize: 4
   moveDuration: 1

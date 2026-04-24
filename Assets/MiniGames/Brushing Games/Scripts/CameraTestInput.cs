@@ -18,6 +18,8 @@ public class CameraTestInput : MonoBehaviour
     {
         if (BrushGameManager.Instance != null)
         {
+            BrushGameManager.Instance.OutsideRightCompleted += HandleOutsideRightCompleted;
+            BrushGameManager.Instance.OutsideLeftCompleted += HandleOutsideLeftCompleted;
             BrushGameManager.Instance.RightSideCompleted += HandleRightSideCompleted;
             BrushGameManager.Instance.LeftSideCompleted += HandleLeftSideCompleted;
         }
@@ -33,6 +35,8 @@ public class CameraTestInput : MonoBehaviour
     {
         if (BrushGameManager.Instance != null)
         {
+            BrushGameManager.Instance.OutsideRightCompleted -= HandleOutsideRightCompleted;
+            BrushGameManager.Instance.OutsideLeftCompleted -= HandleOutsideLeftCompleted;
             BrushGameManager.Instance.RightSideCompleted -= HandleRightSideCompleted;
             BrushGameManager.Instance.LeftSideCompleted -= HandleLeftSideCompleted;
         }
@@ -63,14 +67,28 @@ public class CameraTestInput : MonoBehaviour
         StartCoroutine(StartRightWithDelay());
     }
 
+    private void HandleOutsideRightCompleted()
+    {
+        if (brush != null)
+            brush.MirrorDirection();
+    }
+
     private void HandleLeftSideCompleted()
     {
         StartCoroutine(StartLeftWithDelay());
     }
 
+    private void HandleOutsideLeftCompleted()
+    {
+        if (brush != null)
+            brush.MirrorDirection();
+    }
+
     private void HandleRightSequenceCompleted()
     {
         ReturnToNormalView();
+        if (brush != null)
+            brush.RestoreSavedPose();
     }
 
     private void HandleLeftSequenceCompleted()
@@ -97,6 +115,9 @@ public class CameraTestInput : MonoBehaviour
 
     private IEnumerator StartRightWithDelay()
     {
+        if (brush != null)
+            brush.SetOutsideRightMinigamePose();
+
         cameraController.GoToOutsideZoomView();
 
         yield return new WaitForSeconds(1.1f);
@@ -111,6 +132,9 @@ public class CameraTestInput : MonoBehaviour
 
     private IEnumerator StartLeftWithDelay()
     {
+        if (brush != null)
+            brush.SetOutsideLeftMinigamePose();
+
         cameraController.GoToLeftOutsideZoomView();
 
         yield return new WaitForSeconds(1.1f);

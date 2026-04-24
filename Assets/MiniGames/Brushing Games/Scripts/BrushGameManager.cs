@@ -4,6 +4,8 @@ using UnityEngine;
 public class BrushGameManager : MonoBehaviour
 {
     public static BrushGameManager Instance;
+    public event Action OutsideRightCompleted;
+    public event Action OutsideLeftCompleted;
     public event Action RightSideCompleted;
     public event Action LeftSideCompleted;
     public event Action BrushingCompleted;
@@ -79,6 +81,7 @@ void NextStep()
         SetGroupActive(insideRightGroup, true);
 
         currentType = ZoneType.Inside;
+        OutsideRightCompleted?.Invoke();
     }
 
     else if (currentType == ZoneType.Inside && currentSide == ZoneSide.Right)
@@ -115,6 +118,7 @@ void NextStep()
         SetGroupActive(insideLeftGroup, true);
 
         currentType = ZoneType.Inside;
+        OutsideLeftCompleted?.Invoke();
 
         Debug.Log("Nueva fase: Inside Left");
     }

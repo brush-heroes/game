@@ -5,16 +5,77 @@ using UnityEngine.InputSystem;
 public class BrushController : MonoBehaviour
 {
 
-    public Vector3 normalScale = new Vector3(0.9f,0.9f,0.9f);
-    public Vector3 zoomScale = new Vector3(0.01f,0.01f,0.01f);
+    public Vector3 normalScale = new Vector3(0.9f, 0.9f, 0.9f);
+    public Vector3 zoomScale = new Vector3(0.01f, 0.01f, 0.01f);
+
+    [Header("Brush Rotation")]
+    public Vector3 bristlesUpRotationEuler = Vector3.zero;
+    public Vector3 bristlesDownRotationEuler = new Vector3(0f, 0f, 180f);
+    public Vector3 outsideRightMinigameRotationEuler = new Vector3(0f, 0f, 90f);
+    public Vector3 outsideLeftMinigameRotationEuler = new Vector3(0f, 0f, -90f);
+    private int directionSign = 1;
+    private Quaternion savedRotation;
+    private int savedDirectionSign = 1;
+    private bool hasSavedPose;
 
     public void SetZoomMode(bool isZoom)
     {
-        transform.localScale = isZoom ? zoomScale : normalScale;
+        Vector3 baseScale = isZoom ? zoomScale : normalScale;
+        transform.localScale = new Vector3(Mathf.Abs(baseScale.x) * directionSign, baseScale.y, baseScale.z);
+    }
+
+    public void MirrorDirection()
+    {
+        directionSign *= -1;
+        transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+    }
+
+    public void SetOutsideRightMinigamePose()
+    {
+        SavePoseIfNeeded();
+        transform.rotation = Quaternion.Euler(outsideRightMinigameRotationEuler);
+        directionSign = 1;
+        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+    }
+
+    public void SetOutsideLeftMinigamePose()
+    {
+        SavePoseIfNeeded();
+
+        transform.rotation = Quaternion.Euler(0f, 0f, -90f);
+        directionSign = 1;
+        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+    }
+
+    public void RestoreSavedPose()
+    {
+        if (!hasSavedPose)
+            return;
+
+        transform.rotation = savedRotation;
+        directionSign = savedDirectionSign;
+        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x) * directionSign, transform.localScale.y, transform.localScale.z);
+        hasSavedPose = false;
+    }
+
+    private void SavePoseIfNeeded()
+    {
+        if (hasSavedPose)
+            return;
+
+        savedRotation = transform.rotation;
+        savedDirectionSign = directionSign;
+        hasSavedPose = true;
     }
 
     void Update()
     {
+        
+        if (Keyboard.current != null && Keyboard.current.digit1Key.wasPressedThisFrame)
+        {
+            transform.rotation = Quaternion.Euler(bristlesDownRotationEuler);
+        }
+
         Vector2 mouse = Mouse.current.position.ReadValue();
 
         Ray ray = Camera.main.ScreenPointToRay(mouse);
