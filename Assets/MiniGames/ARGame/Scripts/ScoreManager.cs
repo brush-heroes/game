@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 
@@ -12,6 +13,10 @@ public class ScoreManager : MonoBehaviour
     [SerializeField] int pointsWrongZoneWhileTargetHasWork = -1;
 
     int score;
+
+    public int Score => score;
+    public event Action<int> OnScoreChanged;
+
     private int totalSpawned;
     private int totalCleaned;
     private int cleansInTargetZone;
@@ -30,6 +35,7 @@ public class ScoreManager : MonoBehaviour
     public void AddScore(int amount)
     {
         score += amount;
+        OnScoreChanged?.Invoke(score);
         UpdateScoreText();
     }
 
@@ -81,6 +87,7 @@ public class ScoreManager : MonoBehaviour
         totalCleaned = 0;
         cleansInTargetZone = 0;
         cleansOutsideTargetZone = 0;
+        OnScoreChanged?.Invoke(score);
         UpdateScoreText();
     }
 
