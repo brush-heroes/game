@@ -30,6 +30,11 @@ public class BrushController : MonoBehaviour
         transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
     }
 
+    public void SetStartPose()
+    {
+        transform.rotation = Quaternion.Euler(bristlesDownRotationEuler);
+    }
+
     public void SetOutsideRightMinigamePose()
     {
         SavePoseIfNeeded();
@@ -70,12 +75,6 @@ public class BrushController : MonoBehaviour
 
     void Update()
     {
-        
-        if (Keyboard.current != null && Keyboard.current.digit1Key.wasPressedThisFrame)
-        {
-            transform.rotation = Quaternion.Euler(bristlesDownRotationEuler);
-        }
-
         Vector2 mouse = Mouse.current.position.ReadValue();
 
         Ray ray = Camera.main.ScreenPointToRay(mouse);

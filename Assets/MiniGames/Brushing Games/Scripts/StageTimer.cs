@@ -23,7 +23,7 @@ public class StageTimer : MonoBehaviour
     [Header("Current Flow")]
     public BushingSide currentSide;
     public bool isOutsidePhase = true;
-    public float transitionDelay = 1f;
+    public float transitionDelay = 3f;
     public float stageDuration = 10f;
 
     [Header("Right Stages")]

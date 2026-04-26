@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class CameraTestInput : MonoBehaviour
 {
@@ -9,13 +10,17 @@ public class CameraTestInput : MonoBehaviour
 
     public BrushController brush;
     public TongueGameManager tongueGameManager;
+    public Button startButton;
     public GameObject brushOff;
     public GameObject mouth;
     public GameObject ninoSucio;
     private bool tongueSequenceStarted;
+    private bool gameStarted;
 
     private void Start()
     {
+        ResolveStartButtonIfNeeded();
+
         if (BrushGameManager.Instance != null)
         {
             BrushGameManager.Instance.OutsideRightCompleted += HandleOutsideRightCompleted;
@@ -29,6 +34,9 @@ public class CameraTestInput : MonoBehaviour
             stageTimer.RightSequenceCompleted += HandleRightSequenceCompleted;
             stageTimer.LeftSequenceCompleted += HandleLeftSequenceCompleted;
         }
+
+        if (startButton != null)
+            startButton.onClick.AddListener(OnStartButtonPressed);
     }
 
     private void OnDestroy()
@@ -46,19 +54,47 @@ public class CameraTestInput : MonoBehaviour
             stageTimer.RightSequenceCompleted -= HandleRightSequenceCompleted;
             stageTimer.LeftSequenceCompleted -= HandleLeftSequenceCompleted;
         }
+
+        if (startButton != null)
+            startButton.onClick.RemoveListener(OnStartButtonPressed);
     }
 
-    private void Update()
+    public void OnStartButtonPressed()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (gameStarted)
+            return;
+
+        gameStarted = true;
+        cameraController.GoToNormalView();
+
+        if (brush != null)
         {
-            cameraController.GoToNormalView();
-
+            brush.SetStartPose();
             brush.SetZoomMode(false);
+        }
 
-            if (ninoSucio != null)
-                ninoSucio.SetActive(false);
-        
+        if (ninoSucio != null)
+            ninoSucio.SetActive(false);
+
+        if (startButton != null)
+            startButton.gameObject.SetActive(false);
+    }
+
+    private void ResolveStartButtonIfNeeded()
+    {
+        if (startButton != null)
+            return;
+
+        GameObject buttonObject = GameObject.Find("StartButton");
+        if (buttonObject == null)
+            buttonObject = GameObject.Find("startButton");
+
+        if (buttonObject != null)
+            startButton = buttonObject.GetComponent<Button>();
+
+        if (startButton == null)
+        {
+            Debug.LogWarning("CameraTestInput: No se encontro 'StartButton'. Asignalo en el inspector.");
         }
     }
 
