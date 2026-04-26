@@ -9,6 +9,7 @@ public class CameraTestInput : MonoBehaviour
     public StageTimer stageTimer;
 
     public BrushController brush;
+    public TongueSwipeCleaningManager tongueSwipeCleaningManager;
     public TongueGameManager tongueGameManager;
     public Button startButton;
     public GameObject brushOff;
@@ -35,6 +36,9 @@ public class CameraTestInput : MonoBehaviour
             stageTimer.LeftSequenceCompleted += HandleLeftSequenceCompleted;
         }
 
+        if (tongueSwipeCleaningManager != null)
+            tongueSwipeCleaningManager.CleaningCompleted += HandleTongueSwipeCompleted;
+
         if (startButton != null)
             startButton.onClick.AddListener(OnStartButtonPressed);
     }
@@ -54,6 +58,9 @@ public class CameraTestInput : MonoBehaviour
             stageTimer.RightSequenceCompleted -= HandleRightSequenceCompleted;
             stageTimer.LeftSequenceCompleted -= HandleLeftSequenceCompleted;
         }
+
+        if (tongueSwipeCleaningManager != null)
+            tongueSwipeCleaningManager.CleaningCompleted -= HandleTongueSwipeCompleted;
 
         if (startButton != null)
             startButton.onClick.RemoveListener(OnStartButtonPressed);
@@ -185,14 +192,33 @@ public class CameraTestInput : MonoBehaviour
 
     private IEnumerator StartTongueWithDelay()
     {
-        if (brushOff != null)
-            brushOff.SetActive(false);
-
         cameraController.GoToTongueZoomView();
 
         yield return new WaitForSeconds(1.1f);
 
-        tongueGameManager.StartTongueGame();
+        if (tongueSwipeCleaningManager != null)
+        {
+            tongueSwipeCleaningManager.StartCleaningMechanic();
+            yield break;
+        }
+
+        if (brushOff != null)
+            brushOff.SetActive(false);
+
+        if (tongueGameManager != null)
+            tongueGameManager.StartTongueGame();
+    }
+
+    private void HandleTongueSwipeCompleted()
+    {
+        if (tongueSwipeCleaningManager != null)
+            tongueSwipeCleaningManager.ClearSpawnedDirt();
+
+        if (brushOff != null)
+            brushOff.SetActive(false);
+
+        if (tongueGameManager != null)
+            tongueGameManager.StartTongueGame();
     }
 
 }
