@@ -570,7 +570,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1472126571705040171, guid: 2acdfe247feb5ee4e9924865d8ef9054, type: 3}
       propertyPath: nextSceneName
-      value: Zoom
+      value: Animation
       objectReference: {fileID: 0}
     - target: {fileID: 1472126571705040171, guid: 2acdfe247feb5ee4e9924865d8ef9054, type: 3}
       propertyPath: waitBeforeFade
