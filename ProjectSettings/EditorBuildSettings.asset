@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/MiniGames/ARGame/Scenes/ARGame.unity
     guid: 508946513e7025046b364b64c2dc862d
-  - enabled: 1
+  - enabled: 0
     path: Assets/MiniGames/Brushing Games/Scenes/BrushingGame.unity
     guid: ad6a5e6c2e4b613489ffb7d7d2060ee8
   - enabled: 0
