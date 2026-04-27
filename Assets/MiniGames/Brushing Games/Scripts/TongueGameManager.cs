@@ -91,15 +91,16 @@ private Vector2 GetRandomPositionInsideTongue()
 
     private void HandleInput()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector2 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            TrySelectItem(worldPosition);
-        }
-
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
             Vector2 worldPosition = Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position);
+            TrySelectItem(worldPosition);
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector2 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             TrySelectItem(worldPosition);
         }
     }

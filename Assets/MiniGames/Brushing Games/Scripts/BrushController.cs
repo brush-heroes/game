@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 
 public class BrushController : MonoBehaviour
@@ -75,14 +74,40 @@ public class BrushController : MonoBehaviour
 
     void Update()
     {
-        Vector2 mouse = Mouse.current.position.ReadValue();
+        Camera cam = Camera.main;
+        if (cam == null)
+            return;
 
-        Ray ray = Camera.main.ScreenPointToRay(mouse);
+        if (!TryGetPointerScreenPosition(out Vector2 pointerScreenPosition))
+            return;
 
-        float distance = -Camera.main.transform.position.z;
+        Ray ray = cam.ScreenPointToRay(pointerScreenPosition);
+
+        float distance = -cam.transform.position.z;
 
         Vector3 worldPos = ray.origin + ray.direction * distance;
 
         transform.position = new Vector3(worldPos.x, worldPos.y, 0f);
+    }
+
+    private bool TryGetPointerScreenPosition(out Vector2 position)
+    {
+        // Android/iOS: usar touch como fuente principal.
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            position = touch.position;
+            return true;
+        }
+
+        // Fallback para pruebas en Editor/PC.
+        if (Input.mousePresent)
+        {
+            position = Input.mousePosition;
+            return true;
+        }
+
+        position = default;
+        return false;
     }
 }
