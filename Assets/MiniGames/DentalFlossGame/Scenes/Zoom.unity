@@ -337,7 +337,7 @@ Transform:
   m_GameObject: {fileID: 305846999}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.18, y: -0.95, z: 0}
+  m_LocalPosition: {x: 4.02, y: -1.5, z: 0}
   m_LocalScale: {x: -0.5772653, y: 0.5772653, z: 0.5772653}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -354,6 +354,7 @@ GameObject:
   m_Component:
   - component: {fileID: 662260582}
   - component: {fileID: 662260581}
+  - component: {fileID: 662260583}
   m_Layer: 0
   m_Name: Floss
   m_TagString: Untagged
@@ -422,12 +423,33 @@ Transform:
   m_GameObject: {fileID: 662260580}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.06, y: 1.55, z: 0}
+  m_LocalPosition: {x: -3.43, y: 2.51, z: 0}
   m_LocalScale: {x: 0.6107188, y: 0.6796384, z: 0.49428248}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &662260583
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662260580}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 18c9a7b7ebb317542b56bc94c2f27892, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1205018235
 GameObject:
   m_ObjectHideFlags: 0
