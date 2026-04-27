@@ -13,14 +13,12 @@ public class BrushCircleDetector : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (TryGetPointerWorldPosition(out Vector2 pointerWorldPosition))
         {
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
             // evitar puntos duplicados
-            if (points.Count == 0 || Vector2.Distance(points[points.Count - 1], mousePos) > minMovement)
+            if (points.Count == 0 || Vector2.Distance(points[points.Count - 1], pointerWorldPosition) > minMovement)
             {
-                points.Add(mousePos);
+                points.Add(pointerWorldPosition);
             }
 
             if (points.Count > 20)
@@ -43,6 +41,31 @@ public class BrushCircleDetector : MonoBehaviour
         {
             points.Clear();
         }
+    }
+
+    private bool TryGetPointerWorldPosition(out Vector2 worldPosition)
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+        {
+            worldPosition = default;
+            return false;
+        }
+
+        if (Input.touchCount > 0)
+        {
+            worldPosition = cam.ScreenToWorldPoint(Input.GetTouch(0).position);
+            return true;
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            worldPosition = cam.ScreenToWorldPoint(Input.mousePosition);
+            return true;
+        }
+
+        worldPosition = default;
+        return false;
     }
 
     bool IsCircle()

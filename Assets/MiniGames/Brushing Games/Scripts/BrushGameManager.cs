@@ -1,8 +1,14 @@
+using System;
 using UnityEngine;
 
 public class BrushGameManager : MonoBehaviour
 {
     public static BrushGameManager Instance;
+    public event Action OutsideRightCompleted;
+    public event Action OutsideLeftCompleted;
+    public event Action RightSideCompleted;
+    public event Action LeftSideCompleted;
+    public event Action BrushingCompleted;
 
     public ZoneType currentType;
     public ZoneSide currentSide;
@@ -24,9 +30,21 @@ public class BrushGameManager : MonoBehaviour
 
     private void Start()
     {
-        
+        StartFromChewingRight();
+    }
+
+    public void StartFromChewingRight()
+    {
         currentType = ZoneType.Chewing;
         currentSide = ZoneSide.Right;
+        cleaned = 0;
+
+        SetGroupActive(chewingRightGroup, true);
+        SetGroupActive(outsideRightGroup, false);
+        SetGroupActive(insideRightGroup, false);
+        SetGroupActive(chewingLeftGroup, false);
+        SetGroupActive(outsideLeftGroup, false);
+        SetGroupActive(insideLeftGroup, false);
     }
 
     public void AddClean()
@@ -51,31 +69,33 @@ void NextStep()
 
     if (currentType == ZoneType.Chewing && currentSide == ZoneSide.Right)
     {
-        chewingRightGroup.SetActive(false);
-        outsideRightGroup.SetActive(true);
+        SetGroupActive(chewingRightGroup, false);
+        SetGroupActive(outsideRightGroup, true);
 
         currentType = ZoneType.Outside;
     }
 
     else if (currentType == ZoneType.Outside && currentSide == ZoneSide.Right)
     {
-        outsideRightGroup.SetActive(false);
-        insideRightGroup.SetActive(true);
+        SetGroupActive(outsideRightGroup, false);
+        SetGroupActive(insideRightGroup, true);
 
         currentType = ZoneType.Inside;
+        OutsideRightCompleted?.Invoke();
     }
 
     else if (currentType == ZoneType.Inside && currentSide == ZoneSide.Right)
     {
-        insideRightGroup.SetActive(false);
+        SetGroupActive(insideRightGroup, false);
 
-        Debug.Log("Terminaste lado derecho 🔥");
+        Debug.Log("Terminaste lado derecho");
 
         // PASAR A IZQUIERDA
-        chewingLeftGroup.SetActive(true);
+        SetGroupActive(chewingLeftGroup, true);
 
         currentType = ZoneType.Chewing;
         currentSide = ZoneSide.Left;
+        RightSideCompleted?.Invoke();
 
         Debug.Log("Nueva fase: Chewing Left");
     }
@@ -84,8 +104,8 @@ void NextStep()
 
     else if (currentType == ZoneType.Chewing && currentSide == ZoneSide.Left)
     {
-        chewingLeftGroup.SetActive(false);
-        outsideLeftGroup.SetActive(true);
+        SetGroupActive(chewingLeftGroup, false);
+        SetGroupActive(outsideLeftGroup, true);
 
         currentType = ZoneType.Outside;
 
@@ -94,20 +114,46 @@ void NextStep()
 
     else if (currentType == ZoneType.Outside && currentSide == ZoneSide.Left)
     {
-        outsideLeftGroup.SetActive(false);
-        insideLeftGroup.SetActive(true);
+        SetGroupActive(outsideLeftGroup, false);
+        SetGroupActive(insideLeftGroup, true);
 
         currentType = ZoneType.Inside;
+        OutsideLeftCompleted?.Invoke();
 
         Debug.Log("Nueva fase: Inside Left");
     }
 
     else if (currentType == ZoneType.Inside && currentSide == ZoneSide.Left)
     {
-        insideLeftGroup.SetActive(false);
+        SetGroupActive(insideLeftGroup, false);
+        LeftSideCompleted?.Invoke();
+        BrushingCompleted?.Invoke();
 
-        Debug.Log("🎉 TERMINASTE TODO EL CEPILLADO 🎉");
+        Debug.Log("TERMINASTE TODO EL CEPILLADO");
 
     }
 }
+
+    private void SetGroupActive(GameObject group, bool isActive)
+    {
+        if (group == null)
+            return;
+
+        if (isActive)
+            EnsureParentHierarchyActive(group.transform);
+
+        group.SetActive(isActive);
+    }
+
+    private void EnsureParentHierarchyActive(Transform child)
+    {
+        Transform parent = child.parent;
+        while (parent != null)
+        {
+            if (!parent.gameObject.activeSelf)
+                parent.gameObject.SetActive(true);
+
+            parent = parent.parent;
+        }
+    }
 }
