@@ -7,6 +7,7 @@ TagManager:
   - Brush
   - Dirt
   - Bacteria
+  - Teeth
   layers:
   - Default
   - TransparentFX

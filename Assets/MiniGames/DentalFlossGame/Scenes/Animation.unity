@@ -546,6 +546,10 @@ PrefabInstance:
       value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 1472126571705040171, guid: 2acdfe247feb5ee4e9924865d8ef9054, type: 3}
+      propertyPath: nextSceneName
+      value: Game
+      objectReference: {fileID: 0}
+    - target: {fileID: 1472126571705040171, guid: 2acdfe247feb5ee4e9924865d8ef9054, type: 3}
       propertyPath: waitBeforeFade
       value: 8.5
       objectReference: {fileID: 0}
