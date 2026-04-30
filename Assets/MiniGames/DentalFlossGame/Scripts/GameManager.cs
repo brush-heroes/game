@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -9,7 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Game Settings")]
-    public float remainingTime = 15f;
+    public float remainingTime = 20f;
     public int totalScore = 0;
     public bool isGameActive = true;
 
@@ -21,14 +19,22 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        Instance = this;
+        // Configuramos el patrón Singleton de forma segura
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Start()
     {
         Time.timeScale = 1;
         if (finalPanel != null) finalPanel.SetActive(false);
-        Debug.Log("Juego de Dental Floss iniciado");
+        Debug.Log("Juego de Dental Floss iniciado correctamente");
     }
 
     void Update()
@@ -53,11 +59,11 @@ public class GameManager : MonoBehaviour
         if (scoreText != null) scoreText.text = "Puntos: " + totalScore;
     }
 
+    // Método simplificado para sumar puntaje directamente desde FlossController
     public void AddScore(int amount)
     {
         if (isGameActive)
         {
-            ScoreSystem.Instance.AddScore(amount);
             totalScore += amount;
         }
     }

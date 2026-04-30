@@ -4,17 +4,13 @@ public class FlossController : MonoBehaviour
 {
     [Header("Configuración de Movimiento")]
     public float lerpSpeed = 15f;
-    public float thresholdSerrucho = 0.05f; // Sensibilidad para detectar el zigzag
+    public float thresholdSerrucho = 0.05f;
 
-    [Header("Referencias de Sprites")]
-    public Sprite spriteRecto;
-    public Sprite spriteFormaC;
-    private SpriteRenderer sRenderer;
+    [Header("Referencias de la Seda")]
+    public GameObject curvedFlossObj;
 
-    [Header("Mecánica de Limpieza")]
-    public TeethProgression progressionScript; // Referencia al script que cambia los dientes
-    public GameObject maskDerecha;
-    public GameObject maskIzquierda;
+    [Header("Referencia de la Máscara")]
+    public GameObject maskTeeth;
 
     private Vector3 lastPosition;
     private Vector3 offset;
@@ -24,79 +20,70 @@ public class FlossController : MonoBehaviour
     void Start()
     {
         lastPosition = transform.position;
-        sRenderer = GetComponentInChildren<SpriteRenderer>();
-        sRenderer.sprite = spriteRecto;
+        if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
     }
 
     void Update()
     {
-        HandleInput();
         if (isDragging)
         {
             PerformMovement();
             CheckTechnicalQuality();
         }
-    }
-
-    void HandleInput()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector3 mousePos = GetMouseWorldPos();
-            Collider2D hit = Physics2D.OverlapPoint(mousePos);
-            if (hit != null && (hit.gameObject == gameObject || hit.transform.parent == transform))
-            {
-                isDragging = true;
-                offset = transform.position - mousePos;
-            }
-        }
 
         if (Input.GetMouseButtonUp(0))
         {
             isDragging = false;
-            sRenderer.sprite = spriteRecto; // Al soltar, vuelve a forma recta
+            if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
         }
+    }
+
+    private void OnMouseDown()
+    {
+        Vector3 mousePos = GetMouseWorldPos();
+        isDragging = true;
+        offset = transform.position - mousePos;
     }
 
     void PerformMovement()
     {
         Vector3 mousePos = GetMouseWorldPos();
         Vector3 targetPos = mousePos + offset;
+
+        // Movimiento suave hacia la posición objetivo
         transform.position = Vector3.Lerp(transform.position, targetPos, lerpSpeed * Time.deltaTime);
 
-        // Lógica de FLIP y MÁSCARAS
-        // Si X es positivo (derecha), usamos escala positiva y máscara derecha
-        bool mirandoderecha = transform.position.x > 0;
-        transform.localScale = new Vector3(mirandoderecha ? 0.775f : -0.775f, 0.8625f, 1f);
+        // Determinamos la dirección basándonos en el cambio de posición (hacia dónde se mueve)
+        float movementX = transform.position.x - lastPosition.x;
 
-        // Activa la máscara según hacia donde mire el aplicador
-        maskDerecha.SetActive(mirandoderecha);
-        maskIzquierda.SetActive(!mirandoderecha);
+        // Solo actualizamos el flip si hay un movimiento significativo en X
+        if (Mathf.Abs(movementX) > 0.01f)
+        {
+            bool mirandoDerecha = movementX > 0;
+            // Cambia la escala para voltear el aplicador conservando sus proporciones
+            transform.localScale = new Vector3(mirandoDerecha ? 0.775f : -0.775f, 0.8625f, 1f);
+        }
+
+        lastPosition = transform.position;
     }
 
     void CheckTechnicalQuality()
     {
-        // 1. Detectar si estamos haciendo "Serrucho" (movimiento lateral rápido)
         float deltaX = Mathf.Abs(transform.position.x - lastPosition.x);
 
-        // 2. Detectar si estamos abrazando el diente (Forma en C)
-        // Cambiamos el sprite si estamos cerca del centro y el jugador inclina el aplicador
         if (estaEnContactoConDiente)
         {
-            sRenderer.sprite = spriteFormaC; //
+            if (curvedFlossObj != null) curvedFlossObj.SetActive(true);
 
-            // 3. Sumar progreso si la técnica es correcta
             if (deltaX > thresholdSerrucho)
             {
-                progressionScript.SumarProgreso(Time.deltaTime * 10f); // Limpieza gradual
+                GameManager.Instance.totalScore += Mathf.RoundToInt(Time.deltaTime * 20f);
             }
         }
         else
         {
-            sRenderer.sprite = spriteRecto;
+            if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
         }
-
-        lastPosition = transform.position;
     }
 
     Vector3 GetMouseWorldPos()
@@ -106,14 +93,19 @@ public class FlossController : MonoBehaviour
         return pos;
     }
 
-    // Usamos los colisionadores verdes que dibujaste
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Diente")) estaEnContactoConDiente = true;
+        if (collision.CompareTag("Diente"))
+        {
+            estaEnContactoConDiente = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Diente")) estaEnContactoConDiente = false;
+        if (collision.CompareTag("Diente"))
+        {
+            estaEnContactoConDiente = false;
+        }
     }
 }
