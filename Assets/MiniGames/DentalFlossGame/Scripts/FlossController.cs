@@ -3,23 +3,25 @@ using UnityEngine;
 public class FlossController : MonoBehaviour
 {
     [Header("Configuración de Movimiento")]
-    public float lerpSpeed = 15f;
+    public float moveSpeed = 15f;
     public float thresholdSerrucho = 0.05f;
 
     [Header("Referencias de la Seda")]
     public GameObject curvedFlossObj;
 
-    [Header("Referencia de la Máscara")]
-    public GameObject maskTeeth;
-
-    private Vector3 lastPosition;
+    private Rigidbody2D rb;
     private Vector3 offset;
     private bool isDragging = false;
-    private bool estaEnContactoConDiente = false;
+    private bool estaEnEspacioInterdental = false;
 
     void Start()
     {
-        lastPosition = transform.position;
+        rb = GetComponent<Rigidbody2D>();
+
+        // Configuramos el Rigidbody de forma segura y compatible
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = 0;
+
         if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
     }
 
@@ -27,13 +29,14 @@ public class FlossController : MonoBehaviour
     {
         if (isDragging)
         {
-            PerformMovement();
+            MoveWithPhysics();
             CheckTechnicalQuality();
         }
 
         if (Input.GetMouseButtonUp(0))
         {
             isDragging = false;
+            rb.velocity = Vector2.zero; // Corregido: usando velocity estándar
             if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
         }
     }
@@ -43,41 +46,31 @@ public class FlossController : MonoBehaviour
         Vector3 mousePos = GetMouseWorldPos();
         isDragging = true;
         offset = transform.position - mousePos;
+
+        // Corregido el flip para que mire hacia el mouse correctamente
+        bool clickIzquierda = mousePos.x > 0;
+        transform.localScale = new Vector3(clickIzquierda ? 0.775f : -0.775f, 0.8625f, 1f);
     }
 
-    void PerformMovement()
+    void MoveWithPhysics()
     {
         Vector3 mousePos = GetMouseWorldPos();
         Vector3 targetPos = mousePos + offset;
 
-        // Movimiento suave hacia la posición objetivo
-        transform.position = Vector3.Lerp(transform.position, targetPos, lerpSpeed * Time.deltaTime);
-
-        // Determinamos la dirección basándonos en el cambio de posición (hacia dónde se mueve)
-        float movementX = transform.position.x - lastPosition.x;
-
-        // Solo actualizamos el flip si hay un movimiento significativo en X
-        if (Mathf.Abs(movementX) > 0.01f)
-        {
-            bool mirandoDerecha = movementX > 0;
-            // Cambia la escala para voltear el aplicador conservando sus proporciones
-            transform.localScale = new Vector3(mirandoDerecha ? 0.775f : -0.775f, 0.8625f, 1f);
-        }
-
-        lastPosition = transform.position;
+        Vector2 force = (targetPos - transform.position) * moveSpeed;
+        rb.velocity = force; // Corregido: usando velocity estándar
     }
 
     void CheckTechnicalQuality()
     {
-        float deltaX = Mathf.Abs(transform.position.x - lastPosition.x);
-
-        if (estaEnContactoConDiente)
+        if (estaEnEspacioInterdental)
         {
             if (curvedFlossObj != null) curvedFlossObj.SetActive(true);
 
+            float deltaX = Mathf.Abs(rb.velocity.x); // Corregido: usando velocity estándar
             if (deltaX > thresholdSerrucho)
             {
-                GameManager.Instance.totalScore += Mathf.RoundToInt(Time.deltaTime * 20f);
+                GameManager.Instance.totalScore += Mathf.RoundToInt(Time.deltaTime * 30f);
             }
         }
         else
@@ -95,17 +88,17 @@ public class FlossController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Diente"))
+        if (collision.CompareTag("Interdental"))
         {
-            estaEnContactoConDiente = true;
+            estaEnEspacioInterdental = true;
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Diente"))
+        if (collision.CompareTag("Interdental"))
         {
-            estaEnContactoConDiente = false;
+            estaEnEspacioInterdental = false;
         }
     }
 }
