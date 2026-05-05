@@ -27,6 +27,8 @@ public class TongueGameManager : MonoBehaviour
     private int remainingDirt;
     private bool gameActive;
 
+    public event System.Action TongueGameWon;
+
     private readonly List<GameObject> spawnedItems = new List<GameObject>();
 
     private void Update()
@@ -145,6 +147,7 @@ private Vector2 GetRandomPositionInsideTongue()
             messageText.text = "¡Lengua limpia!";
 
         Debug.Log("Victoria en limpieza de lengua");
+        TongueGameWon?.Invoke();
     }
 
     private void ClearItems()

@@ -20,6 +20,7 @@ public class GameScreenManager : MonoBehaviour
     [SerializeField] CanvasGroup startScreen;
     [SerializeField] CanvasGroup gameHUD;
     [SerializeField] CanvasGroup endScreen;
+    [SerializeField] CanvasGroup pauseScreen;
 
     [Header("End Screen Content")]
     [SerializeField] Image resultImage;
@@ -36,7 +37,7 @@ public class GameScreenManager : MonoBehaviour
     [SerializeField] GameObject guidePanel;   // hidden on start/end screens
 
     [Header("Navigation")]
-    [SerializeField] string menuSceneName = "MainMenu";
+    [SerializeField] string menuSceneName = "MenuScene";
     [SerializeField] float fadeDuration = 0.4f;
 
     public GameMode CurrentMode { get; private set; }
@@ -53,6 +54,7 @@ public class GameScreenManager : MonoBehaviour
         SetScreen(startScreen, true);
         SetScreen(gameHUD, false);
         SetScreen(endScreen, false);
+        SetScreen(pauseScreen, false);
         if (guidePanel != null) guidePanel.SetActive(false);
     }
 
@@ -107,6 +109,25 @@ public class GameScreenManager : MonoBehaviour
 
     public void OnMenuButtonPressed()  => SceneManager.LoadScene(menuSceneName);
     public void OnRetryButtonPressed() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+    public void OnPauseButtonPressed()
+    {
+        if (!sessionManager.IsSessionRunning) return;
+        Time.timeScale = 0f;
+        SetScreen(pauseScreen, true);
+    }
+
+    public void OnResumeButtonPressed()
+    {
+        Time.timeScale = 1f;
+        SetScreen(pauseScreen, false);
+    }
+
+    public void OnPauseMenuButtonPressed()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(menuSceneName);
+    }
 
     // ── Session events ────────────────────────────────────────────────────────
 
