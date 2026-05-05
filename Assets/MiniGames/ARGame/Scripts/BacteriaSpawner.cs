@@ -22,6 +22,10 @@ public class BacteriaSpawner : MonoBehaviour
     [SerializeField] SessionManager sessionManager;
     [SerializeField] private int bacteriaPerZone = 10;
 
+    [Header("Spawn Area")]
+    [Tooltip("World-space radius around the zone centre where bacteria may appear.")]
+    [SerializeField] float spawnRadius = 0.008f;
+
     [Header("Active zone pacing")]
     [Tooltip("While a zone is the current brushing step, it also fills on this clock so it feels urgent even if the global timeline was only halfway.")]
     [SerializeField] float activeZoneRampDuration = 12f;
@@ -36,6 +40,7 @@ public class BacteriaSpawner : MonoBehaviour
     private float sessionTimer;
     private float secondsIntoCurrentStep;
     private bool sessionClearInProgress;
+    int _nextSortingOrder;
 
     void Start()
     {
@@ -78,6 +83,7 @@ public class BacteriaSpawner : MonoBehaviour
     void ResetAllZoneCounters()
     {
         sessionTimer = 0f;
+        _nextSortingOrder = 0;
 
         foreach (ZoneData data in zones.Values)
         {
@@ -120,7 +126,7 @@ public class BacteriaSpawner : MonoBehaviour
             data.maxCount = bacteriaPerZone;
             data.spawnTimer = 0f;
             data.isFullySpawned = false;
-            data.targetFillTime = 20f * (index + 1);
+            data.targetFillTime = 60f * (index + 1);
 
             zones.Add(zone, data);
 
@@ -236,8 +242,11 @@ public class BacteriaSpawner : MonoBehaviour
 
         b.Initialize(this, zone);
 
-        float radius = 0.02f;
-        Vector2 random2D = UnityEngine.Random.insideUnitCircle * radius;
+        // Front zones span horizontally — use an ellipse wider than tall.
+        Vector2 circle = UnityEngine.Random.insideUnitCircle;
+        Vector2 random2D = (zone == MouthZone.FrontUpper || zone == MouthZone.FrontLower)
+            ? new Vector2(circle.x * spawnRadius * 1.4f, circle.y * spawnRadius * 0.6f)
+            : circle * spawnRadius;
 
         float surfaceDistance = 0.015f;
 
@@ -249,6 +258,10 @@ public class BacteriaSpawner : MonoBehaviour
 
         bacteria.transform.position = worldPosition;
 
+        // New bacteria appear behind previously spawned ones.
+        var sr = bacteria.GetComponentInChildren<SpriteRenderer>(true);
+        if (sr != null) sr.sortingOrder = _nextSortingOrder--;
+
         bacteria.transform.SetParent(zoneTransform, true);
 
         b.ApplyTargetHighlight(zone == currentHighlightZone);
@@ -256,6 +269,7 @@ public class BacteriaSpawner : MonoBehaviour
         data.currentCount++;
         data.aliveCount++;
         spawnedBacteria.Add(bacteria);
+        ARGameAudioManager.Instance?.PlayBacteriaBorn();
         ScoreManager.instance?.RegisterSpawn();
     }
 
