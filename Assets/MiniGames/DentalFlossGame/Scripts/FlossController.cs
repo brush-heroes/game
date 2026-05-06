@@ -1,104 +1,244 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class FlossController : MonoBehaviour
 {
     [Header("Configuración de Movimiento")]
-    public float moveSpeed = 15f;
-    public float thresholdSerrucho = 0.05f;
+    public float lerpSpeed = 20f;
+    public float minY = -0.33f;
+    public float maxY = 1.66f;
 
-    [Header("Referencias de la Seda")]
+    public float rightMinX = 2.10f;
+    public float rightMaxX = 4.40f;
+    public float leftMinX = -4.40f;
+    public float leftMaxX = -2.10f;
+
+    [Range(0.1f, 0.5f)]
+    public float margenJaladoX = 0.2f;
+
+    [Header("Referencias")]
     public GameObject curvedFlossObj;
+    public SpriteRenderer normalFlossRenderer;
 
-    private Rigidbody2D rb;
-    private Vector3 offset;
+    [Header("Puntuación")]
+    public int pointsPerSecondCorrect = 15;
+    public int pointsPerSecondCurve = 40;
+    public int bonusOnComplete = 25;
+
+    private readonly Vector3 escalaInicialSeda = new Vector3(-0.6567135f, 0.6286655f, 0.4942825f);
+    private readonly Vector3 posicionInicialSedaDerecha = new Vector3(3.15f, 1.66f, 0f);
+    private readonly Vector3 posicionInicialSedaIzquierda = new Vector3(-3.15f, 1.66f, 0f);
+    private readonly Vector3 escalaCurva = new Vector3(0.948254f, 0.9928277f, 0.4942825f);
+    private readonly Vector3 posicionCurva = new Vector3(0.071f, -0.198f, 0f);
+
     private bool isDragging = false;
-    private bool estaEnEspacioInterdental = false;
+    private bool enModoCurva = false;
+    private bool estaEnLadoDerecho = true;
+    private float targetX;
+    private Vector3 lastPosition;
+    private float currentMinX, currentMaxX;
+    private float currentMinXJalado, currentMaxXJalado;
+    private float contadorPuntaje = 0f;
+    private bool puedeSerClickeado = true;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        transform.position = posicionInicialSedaDerecha;
+        transform.localScale = escalaInicialSeda;
+        estaEnLadoDerecho = true;
 
-        // Configuramos el Rigidbody de forma segura y compatible
-        rb.bodyType = RigidbodyType2D.Dynamic;
-        rb.gravityScale = 0;
+        ActualizarLimitesSegunLado();
 
-        if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
+        if (curvedFlossObj != null)
+        {
+            curvedFlossObj.transform.localPosition = posicionCurva;
+            curvedFlossObj.transform.localScale = escalaCurva;
+            curvedFlossObj.SetActive(false);
+        }
+        targetX = transform.position.x;
+        lastPosition = transform.position;
     }
 
     void Update()
     {
-        if (isDragging)
+        if (Input.GetMouseButtonDown(0) && puedeSerClickeado && GameManager.Instance != null && GameManager.Instance.isGameActive)
         {
-            MoveWithPhysics();
-            CheckTechnicalQuality();
+            if (!IsPointerOverUI())
+            {
+                isDragging = true;
+                EvaluacionInicio();
+                contadorPuntaje = 0f;
+            }
+        }
+
+        if (isDragging && GameManager.Instance != null && GameManager.Instance.isGameActive)
+        {
+            PerformBoundedMovement();
+            EvaluateFlossingQuality();
         }
 
         if (Input.GetMouseButtonUp(0))
         {
             isDragging = false;
-            rb.velocity = Vector2.zero; // Corregido: usando velocity estándar
-            if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
+
+            if (!enModoCurva)
+            {
+                EvaluacionSalida();
+            }
+            else
+            {
+                contadorPuntaje = 0f;
+                Debug.Log("Seda curva pausada - continúa presionando para seguir subiendo");
+            }
+        }
+
+        if (transform.position.y >= maxY - 0.05f && enModoCurva)
+        {
+            enModoCurva = false;
+            SetCurvedFloss(false);
+            CambiarDeLado();
+
+            GameManager.Instance.AddScore(bonusOnComplete);
         }
     }
 
-    private void OnMouseDown()
+    private bool IsPointerOverUI()
     {
-        Vector3 mousePos = GetMouseWorldPos();
-        isDragging = true;
-        offset = transform.position - mousePos;
+        if (EventSystem.current == null) return false;
 
-        // Corregido el flip para que mire hacia el mouse correctamente
-        bool clickIzquierda = mousePos.x > 0;
-        transform.localScale = new Vector3(clickIzquierda ? 0.775f : -0.775f, 0.8625f, 1f);
-    }
-
-    void MoveWithPhysics()
-    {
-        Vector3 mousePos = GetMouseWorldPos();
-        Vector3 targetPos = mousePos + offset;
-
-        Vector2 force = (targetPos - transform.position) * moveSpeed;
-        rb.velocity = force; // Corregido: usando velocity estándar
-    }
-
-    void CheckTechnicalQuality()
-    {
-        if (estaEnEspacioInterdental)
+        if (EventSystem.current.IsPointerOverGameObject())
         {
-            if (curvedFlossObj != null) curvedFlossObj.SetActive(true);
+            return true;
+        }
 
-            float deltaX = Mathf.Abs(rb.velocity.x); // Corregido: usando velocity estándar
-            if (deltaX > thresholdSerrucho)
-            {
-                GameManager.Instance.totalScore += Mathf.RoundToInt(Time.deltaTime * 30f);
-            }
+        return false;
+    }
+
+    public void DesactivarClicks()
+    {
+        puedeSerClickeado = false;
+    }
+
+    void ActualizarLimitesSegunLado()
+    {
+        if (estaEnLadoDerecho)
+        {
+            currentMinX = rightMinX;
+            currentMaxX = rightMaxX;
+            currentMinXJalado = rightMinX - margenJaladoX;
+            currentMaxXJalado = rightMaxX + margenJaladoX;
         }
         else
         {
-            if (curvedFlossObj != null) curvedFlossObj.SetActive(false);
+            currentMinX = leftMinX;
+            currentMaxX = leftMaxX;
+            currentMinXJalado = leftMinX - margenJaladoX;
+            currentMaxXJalado = leftMaxX + margenJaladoX;
         }
     }
 
-    Vector3 GetMouseWorldPos()
+    void PerformBoundedMovement()
     {
-        Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        pos.z = 0;
-        return pos;
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0;
+
+        float targetY = Mathf.Clamp(mousePos.y, minY, maxY);
+
+        if (transform.position.y <= minY + 0.1f)
+            targetX = Mathf.Clamp(mousePos.x, currentMinXJalado, currentMaxXJalado);
+        else
+            targetX = Mathf.Clamp(mousePos.x, currentMinX, currentMaxX);
+
+        Vector3 targetPos = new Vector3(targetX, targetY, 0f);
+        float smoothedY = Mathf.Lerp(transform.position.y, targetPos.y, lerpSpeed * Time.deltaTime);
+        float finalX = Mathf.Lerp(transform.position.x, targetX, lerpSpeed * Time.deltaTime);
+
+        transform.position = new Vector3(finalX, smoothedY, 0f);
+        lastPosition = transform.position;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    void EvaluateFlossingQuality()
     {
-        if (collision.CompareTag("Interdental"))
+        if (enModoCurva)
         {
-            estaEnEspacioInterdental = true;
+            SetCurvedFloss(true);
+
+            if (isDragging)
+            {
+                contadorPuntaje += Time.deltaTime;
+                if (contadorPuntaje >= 0.5f)
+                {
+                    GameManager.Instance.AddScore(pointsPerSecondCurve);
+                    contadorPuntaje = 0f;
+                    Debug.Log("Modo curva: +" + pointsPerSecondCurve + " puntos");
+                }
+            }
+            return;
+        }
+
+        bool estaAbajo = transform.position.y <= minY + 0.05f;
+
+        if (estaAbajo && isDragging)
+        {
+            bool jalandoHaciaDiente = estaEnLadoDerecho ? transform.position.x > currentMaxX : transform.position.x < currentMinX;
+
+            if (jalandoHaciaDiente)
+            {
+                enModoCurva = true;
+                SetCurvedFloss(true);
+                GameManager.Instance.AddScore(pointsPerSecondCurve / 2);
+                Debug.Log("Modo curva activado. Sube la seda hasta arriba sin soltar");
+                contadorPuntaje = 0f;
+                return;
+            }
+        }
+
+        if (transform.position.y < maxY && isDragging)
+        {
+            contadorPuntaje += Time.deltaTime;
+            if (contadorPuntaje >= 0.5f)
+            {
+                GameManager.Instance.AddScore(pointsPerSecondCorrect);
+                contadorPuntaje = 0f;
+            }
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    void SetCurvedFloss(bool active)
     {
-        if (collision.CompareTag("Interdental"))
+        if (curvedFlossObj != null) curvedFlossObj.SetActive(active);
+        if (normalFlossRenderer != null) normalFlossRenderer.enabled = !active;
+    }
+
+    void CambiarDeLado()
+    {
+        estaEnLadoDerecho = !estaEnLadoDerecho;
+        ActualizarLimitesSegunLado();
+
+        float absoluteX = Mathf.Abs(escalaInicialSeda.x);
+        transform.localScale = new Vector3(estaEnLadoDerecho ? -absoluteX : absoluteX, escalaInicialSeda.y, escalaInicialSeda.z);
+
+        Vector3 nuevaPos = estaEnLadoDerecho ? posicionInicialSedaDerecha : posicionInicialSedaIzquierda;
+        transform.position = nuevaPos;
+        targetX = nuevaPos.x;
+        lastPosition = transform.position;
+
+        TeethProgression teeth = FindObjectOfType<TeethProgression>();
+        if (teeth != null)
         {
-            estaEnEspacioInterdental = false;
+            teeth.FlipDientes(estaEnLadoDerecho);
         }
+
+        Debug.Log(estaEnLadoDerecho ? "Cambiado a lado DERECHO" : "Cambiado a lado IZQUIERDO");
+    }
+
+    void EvaluacionInicio()
+    {
+        Debug.Log("Comenzó movimiento de seda");
+    }
+
+    void EvaluacionSalida()
+    {
+        Debug.Log("Movimiento normal terminado");
     }
 }

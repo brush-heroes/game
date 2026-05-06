@@ -19,7 +19,6 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        // Configuramos el patrón Singleton de forma segura
         if (Instance == null)
         {
             Instance = this;
@@ -59,7 +58,6 @@ public class GameManager : MonoBehaviour
         if (scoreText != null) scoreText.text = "Puntos: " + totalScore;
     }
 
-    // Método simplificado para sumar puntaje directamente desde FlossController
     public void AddScore(int amount)
     {
         if (isGameActive)
@@ -76,7 +74,20 @@ public class GameManager : MonoBehaviour
         if (finalPanel != null) finalPanel.SetActive(true);
         if (finalScoreText != null) finalScoreText.text = "Puntaje Final: " + totalScore;
 
-        Time.timeScale = 0;
+        FlossController floss = FindObjectOfType<FlossController>();
+        if (floss != null)
+        {
+            floss.gameObject.SetActive(false);
+        }
+
+        // Activar el boton 3D
+        RestartButton restartButton = FindObjectOfType<RestartButton>();
+        if (restartButton != null)
+        {
+            restartButton.gameObject.SetActive(true);
+        }
+
+        // Time.timeScale = 0;  // NO pausar
     }
 
     public void Restart()

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,35 +7,38 @@ public class TeethProgression : MonoBehaviour
     public Sprite mediumTeeth;
     public Sprite cleanTeeth;
 
-    public int mediumLimit = 50;
-    public int cleanLimit = 100;
+    public int mediumLimit = 500;
+    public int cleanLimit = 1000;
 
     public List<SpriteRenderer> teethRenderers;
 
-    // Referencia al controlador de la seda
-    private FlossController flossController;
+    private Sprite currentActiveSprite;
+    private bool estaMirandoDerecha = true;
 
     void Start()
     {
-        flossController = FindObjectOfType<FlossController>();
-        UpdateSprites(dirtyTeeth);
+        currentActiveSprite = dirtyTeeth;
+        UpdateSprites(currentActiveSprite);
     }
 
     void Update()
     {
+        if (GameManager.Instance == null) return;
+
         int score = GameManager.Instance.totalScore;
+        Sprite newSprite;
 
         if (score >= cleanLimit)
-        {
-            UpdateSprites(cleanTeeth);
-        }
+            newSprite = cleanTeeth;
         else if (score >= mediumLimit)
-        {
-            UpdateSprites(mediumTeeth);
-        }
+            newSprite = mediumTeeth;
         else
+            newSprite = dirtyTeeth;
+
+        if (newSprite != currentActiveSprite)
         {
-            UpdateSprites(dirtyTeeth);
+            currentActiveSprite = newSprite;
+            UpdateSprites(currentActiveSprite);
         }
     }
 
@@ -44,25 +46,25 @@ public class TeethProgression : MonoBehaviour
     {
         foreach (SpriteRenderer renderer in teethRenderers)
         {
-            if (renderer.sprite != newSprite)
+            if (renderer != null)
             {
                 renderer.sprite = newSprite;
-                VoltearDiente(renderer.transform); // Llama a la lógica de volteo cada vez que cambia de estado
             }
         }
     }
 
-    // Nueva lógica de volteo basada en la posición del aplicador
-    void VoltearDiente(Transform targetTransform)
+    public void FlipDientes(bool mirandoDerecha)
     {
-        if (flossController != null)
-        {
-            // Comprobamos la dirección del aplicador en el eje X
-            bool sedaDesdeIzquierda = flossController.transform.localScale.x < 0;
+        estaMirandoDerecha = mirandoDerecha;
 
-            // Ajustamos la escala del padre o del objeto mismo para girar el sprite
-            Vector3 currentScale = targetTransform.parent.localScale;
-            targetTransform.parent.localScale = new Vector3(sedaDesdeIzquierda ? -1f : 1f, currentScale.y, currentScale.z);
+        foreach (SpriteRenderer renderer in teethRenderers)
+        {
+            if (renderer != null)
+            {
+                Vector3 scale = renderer.transform.localScale;
+                scale.x = mirandoDerecha ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
+                renderer.transform.localScale = scale;
+            }
         }
     }
 }
