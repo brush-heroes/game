@@ -23,6 +23,9 @@ public class DirtHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            if (BrushingScoreManager.Instance != null)
+                BrushingScoreManager.Instance.AddPointsForMouthDirt();
+
             Destroy(gameObject);
         }
     }

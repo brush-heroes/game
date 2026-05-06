@@ -123,6 +123,9 @@ private Vector2 GetRandomPositionInsideTongue()
     {
         remainingDirt--;
 
+        if (BrushingScoreManager.Instance != null)
+            BrushingScoreManager.Instance.AddPointsForTongueStage2BadBacteria();
+
         spawnedItems.Remove(item.gameObject);
         Destroy(item.gameObject);
 
@@ -134,6 +137,9 @@ private Vector2 GetRandomPositionInsideTongue()
 
     public void ClickedHygieneItem(BrushingTongueItem item)
     {
+        if (BrushingScoreManager.Instance != null)
+            BrushingScoreManager.Instance.ApplyPenaltyForTongueStage2GoodItem();
+
         Debug.Log("Ese no es suciedad.");
     }
 
