@@ -39,8 +39,12 @@ public class BrushGameManager : MonoBehaviour
 
     private void Start()
     {
-        StartFromChewingRight();
+        if (autoStart)
+            StartFromChewingRight();
     }
+
+    [Tooltip("Si está desactivado, el minijuego no inicia hasta que alguien llame StartFromChewingRight().")]
+    public bool autoStart = true;
 
     public void StartFromChewingRight()
     {

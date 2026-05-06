@@ -16,6 +16,7 @@ public class BrushController : MonoBehaviour
     private Quaternion savedRotation;
     private int savedDirectionSign = 1;
     private bool hasSavedPose;
+    private bool followEnabled = true;
 
     public void SetZoomMode(bool isZoom)
     {
@@ -62,6 +63,11 @@ public class BrushController : MonoBehaviour
         hasSavedPose = false;
     }
 
+    public void SetFollowEnabled(bool enabled)
+    {
+        followEnabled = enabled;
+    }
+
     private void SavePoseIfNeeded()
     {
         if (hasSavedPose)
@@ -74,6 +80,9 @@ public class BrushController : MonoBehaviour
 
     void Update()
     {
+        if (!followEnabled)
+            return;
+
         Camera cam = Camera.main;
         if (cam == null)
             return;
