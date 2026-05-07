@@ -22,6 +22,12 @@ public class GameScreenManager : MonoBehaviour
     [SerializeField] CanvasGroup endScreen;
     [SerializeField] CanvasGroup pauseScreen;
 
+    [Header("Face Tracking")]
+    [Tooltip("Assign the FaceTrackingManager component. Start buttons are blocked until a face is detected.")]
+    [SerializeField] FaceTrackingManager faceTracker;
+    [Tooltip("Overlay shown on the start screen while searching for a face (e.g. 'Buscando rostro...').")]
+    [SerializeField] CanvasGroup faceSearchOverlay;
+
     [Header("End Screen Content")]
     [SerializeField] Image resultImage;
     [SerializeField] TMP_Text resultTitle;
@@ -56,22 +62,41 @@ public class GameScreenManager : MonoBehaviour
         SetScreen(endScreen, false);
         SetScreen(pauseScreen, false);
         if (guidePanel != null) guidePanel.SetActive(false);
+
+        // Show face-search overlay until a face is detected.
+        // If faceTracker is not assigned the overlay stays hidden and behavior is unchanged.
+        bool waitingForFace = faceTracker != null && !faceTracker.IsFaceTracked;
+        SetScreen(faceSearchOverlay, waitingForFace);
     }
 
     void OnEnable()
     {
-        if (sessionManager == null) return;
-        sessionManager.OnSessionStarted += HandleSessionStarted;
-        sessionManager.OnSessionEnded  += HandleSessionEnded;
-        sessionManager.OnSessionFailed += HandleSessionFailed;
+        if (sessionManager != null)
+        {
+            sessionManager.OnSessionStarted += HandleSessionStarted;
+            sessionManager.OnSessionEnded  += HandleSessionEnded;
+            sessionManager.OnSessionFailed += HandleSessionFailed;
+        }
+        if (faceTracker != null)
+        {
+            faceTracker.OnFaceDetected += HandleFaceDetected;
+            faceTracker.OnFaceLost     += HandleFaceLost;
+        }
     }
 
     void OnDisable()
     {
-        if (sessionManager == null) return;
-        sessionManager.OnSessionStarted -= HandleSessionStarted;
-        sessionManager.OnSessionEnded  -= HandleSessionEnded;
-        sessionManager.OnSessionFailed -= HandleSessionFailed;
+        if (sessionManager != null)
+        {
+            sessionManager.OnSessionStarted -= HandleSessionStarted;
+            sessionManager.OnSessionEnded  -= HandleSessionEnded;
+            sessionManager.OnSessionFailed -= HandleSessionFailed;
+        }
+        if (faceTracker != null)
+        {
+            faceTracker.OnFaceDetected -= HandleFaceDetected;
+            faceTracker.OnFaceLost     -= HandleFaceLost;
+        }
     }
 
     void Update()
@@ -88,6 +113,8 @@ public class GameScreenManager : MonoBehaviour
 
     public void OnDynamicButtonPressed()
     {
+        if (faceTracker != null && !faceTracker.IsFaceTracked) return;
+
         CurrentMode = GameMode.Dynamic;
         // Show guide panel BEFORE StartSession so BrushingGuideUI is subscribed for zone-1 events.
         if (guidePanel != null) guidePanel.SetActive(true);
@@ -99,6 +126,8 @@ public class GameScreenManager : MonoBehaviour
 
     public void OnGuidedButtonPressed()
     {
+        if (faceTracker != null && !faceTracker.IsFaceTracked) return;
+
         CurrentMode = GameMode.Guided;
         if (guidePanel != null) guidePanel.SetActive(true);
         if (sessionManager != null) sessionManager.TotalTimeLimit = 0f; // no time limit
@@ -127,6 +156,22 @@ public class GameScreenManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(menuSceneName);
+    }
+
+    // ── Face tracking events ──────────────────────────────────────────────────
+
+    void HandleFaceDetected()
+    {
+        // Only act on the start screen — hide the "searching" overlay so the player can press Start.
+        if (startScreen != null && startScreen.alpha > 0f)
+            SetScreen(faceSearchOverlay, false);
+    }
+
+    void HandleFaceLost()
+    {
+        // Only show the overlay again on the start screen; mid-game face loss is silently tolerated.
+        if (startScreen != null && startScreen.alpha > 0f)
+            SetScreen(faceSearchOverlay, true);
     }
 
     // ── Session events ────────────────────────────────────────────────────────

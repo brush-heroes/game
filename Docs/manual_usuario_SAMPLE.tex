@@ -1,0 +1,360 @@
+% ============================================================
+%  BrushHeroes — Manual de Usuario  (DOCUMENTO DE MUESTRA)
+%  Este archivo muestra el formato y estilo del manual final.
+%  Las secciones completas se reemplazarán en el documento real.
+% ============================================================
+\documentclass[12pt, a4paper]{article}
+
+% ── Paquetes ─────────────────────────────────────────────────
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{parskip}
+
+\geometry{
+  top=2.5cm, bottom=2.5cm,
+  left=3cm,  right=2.5cm
+}
+
+% ── Paleta de colores del juego ───────────────────────────────
+\definecolor{heroBlue}{HTML}{2563EB}
+\definecolor{heroGreen}{HTML}{22C55E}
+\definecolor{heroOrange}{HTML}{F97316}
+\definecolor{heroGray}{HTML}{64748B}
+\definecolor{heroBg}{HTML}{F0F9FF}
+
+% ── Tipografía de secciones ───────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{heroBlue}}
+  {\thesection.}{0.8em}{}[\titlerule]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{heroBlue!80!black}}
+  {\thesubsection.}{0.6em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{heroGray}}
+  {\thesubsubsection.}{0.5em}{}
+
+% ── Cajas de aviso ────────────────────────────────────────────
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{notebox}{
+  colback=heroBg, colframe=heroBlue,
+  fonttitle=\bfseries, title=Nota,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt
+}
+
+\newtcolorbox{tipbox}{
+  colback=heroGreen!10, colframe=heroGreen!60!black,
+  fonttitle=\bfseries, title=Consejo,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt
+}
+
+\newtcolorbox{warnbox}{
+  colback=heroOrange!10, colframe=heroOrange,
+  fonttitle=\bfseries, title=Importante,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt
+}
+
+% ── Encabezado y pie de página ────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{heroGray}BrushHeroes — Manual de Usuario}
+\fancyhead[R]{\small\color{heroGray}\leftmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Metadatos PDF ─────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=heroBlue,
+  urlcolor=heroBlue,
+  pdftitle={BrushHeroes - Manual de Usuario},
+  pdfauthor={Equipo BrushHeroes}
+}
+
+% ─────────────────────────────────────────────────────────────
+\begin{document}
+
+% ── PORTADA ──────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+
+  % Logo / imagen de portada
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{img/portada_logo.png}
+    % IMAGEN REQUERIDA: logo o splash art del juego con el nombre "BrushHeroes"
+  \end{figure}
+
+  \vspace{1cm}
+  {\Huge\bfseries\color{heroBlue} BrushHeroes}\\[0.4cm]
+  {\Large\color{heroGray} Manual de Usuario}\\[0.8cm]
+  \rule{0.6\textwidth}{1pt}\\[0.8cm]
+  {\large Videojuego educativo de higiene bucal para niños}\\[0.4cm]
+  {\normalsize Realidad Aumentada · Android}\\[2cm]
+
+  \vfill
+  {\small Versión 1.0 \quad|\quad \today}\\[0.3cm]
+  {\small Universidad \textbf{[nombre de tu universidad]}}\\[0.1cm]
+  {\small Proyecto de Grado — Ingeniería \textbf{[tu carrera]}}
+\end{titlepage}
+
+% ── TABLA DE CONTENIDOS ───────────────────────────────────────
+\tableofcontents
+\newpage
+
+% ─────────────────────────────────────────────────────────────
+%  SECCIÓN 1 — INTRODUCCIÓN  (sección completa de muestra)
+% ─────────────────────────────────────────────────────────────
+\section{Introducción}
+
+\textbf{BrushHeroes} es una aplicación móvil educativa diseñada para motivar a los niños a
+mantener buenos hábitos de higiene bucal. A través de minijuegos interactivos y un sistema de
+progreso gamificado, el jugador aprende la técnica correcta de cepillado de manera divertida.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{img/intro_menu_general.png}
+  % IMAGEN REQUERIDA: captura completa del menú principal (pestaña Minijuegos)
+  \caption{Pantalla principal de BrushHeroes.}
+  \label{fig:intro_menu}
+\end{figure}
+
+\subsection{¿A quién está dirigido?}
+
+BrushHeroes está pensado para niños entre 4 y 10 años, aunque puede ser utilizado por
+cualquier persona. Se recomienda la supervisión de un adulto para la configuración inicial.
+
+\subsection{Características principales}
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Minijuego de Realidad Aumentada (AR):} usa la cámara frontal del dispositivo
+        para superponer bacterias y un cepillo virtual sobre la cara del jugador, enseñando
+        las zonas de cepillado.
+  \item \textbf{Minijuego de Cepillado:} práctica interactiva de la técnica de cepillado.
+  \item \textbf{Minijuego de Hilo Dental:} aprende a usar el hilo dental correctamente.
+  \item \textbf{Sistema de racha:} registra cuántos días consecutivos el jugador ha jugado.
+  \item \textbf{Estrellas y misiones:} recompensas por completar sesiones matutinas y vespertinas.
+  \item \textbf{Calendario de actividad:} visualiza el historial de juego del mes.
+\end{itemize}
+
+\begin{notebox}
+  Esta aplicación \textbf{no reemplaza} la instrucción de un profesional de salud bucal.
+  Su propósito es reforzar hábitos de forma lúdica.
+\end{notebox}
+
+% ─────────────────────────────────────────────────────────────
+%  SECCIÓN 2 — REQUISITOS  (sección completa de muestra)
+% ─────────────────────────────────────────────────────────────
+\section{Requisitos del sistema}
+
+\begin{table}[H]
+  \centering
+  \caption{Requisitos mínimos del dispositivo.}
+  \label{tab:requisitos}
+  \begin{tabular}{>{\bfseries}p{4cm} p{8cm}}
+    \toprule
+    Componente & Requisito \\
+    \midrule
+    Sistema operativo  & Android 9.0 (API 28) o superior \\
+    Procesador         & Octa-core 2.0\,GHz o superior \\
+    Memoria RAM        & 3\,GB mínimo (4\,GB recomendado) \\
+    Almacenamiento     & 300\,MB de espacio libre \\
+    Cámara frontal     & Requerida (resolución mínima 5\,MP) \\
+    Soporte AR         & ARCore compatible (ver lista oficial de Google) \\
+    Conexión a red     & No requerida para jugar \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{warnbox}
+  El \textbf{minijuego de Realidad Aumentada} requiere que el dispositivo sea compatible con
+  \textbf{Google ARCore}. Puede consultar la lista de dispositivos compatibles en
+  \href{https://developers.google.com/ar/devices}{developers.google.com/ar/devices}.
+\end{warnbox}
+
+% ─────────────────────────────────────────────────────────────
+%  SECCIÓN 3 — INSTALACIÓN  (esqueleto — solo muestra estructura)
+% ─────────────────────────────────────────────────────────────
+\section{Instalación}
+
+\subsection{Instalación desde archivo APK}
+
+\begin{enumerate}[leftmargin=1.5cm]
+  \item Descargue el archivo \texttt{BrushHeroes.apk} desde el enlace proporcionado por su
+        institución educativa.
+  \item En su dispositivo Android, vaya a \textbf{Ajustes → Seguridad} y active la opción
+        \textit{«Instalar apps de fuentes desconocidas»}.
+  \item Abra el archivo \texttt{.apk} descargado y siga las instrucciones en pantalla.
+  \item Una vez instalada, la aplicación aparecerá en su menú de aplicaciones con el ícono
+        de BrushHeroes.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{img/install_step1.png}
+    % IMAGEN REQUERIDA: ajustes de Android — activar fuentes desconocidas
+    \caption{Activar fuentes desconocidas.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{img/install_step2.png}
+    % IMAGEN REQUERIDA: diálogo de instalación del APK
+    \caption{Instalar el APK.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{img/install_step3.png}
+    % IMAGEN REQUERIDA: ícono de la app en el lanzador de Android
+    \caption{App instalada.}
+  \end{subfigure}
+  \caption{Proceso de instalación paso a paso.}
+  \label{fig:instalacion}
+\end{figure}
+
+% ─────────────────────────────────────────────────────────────
+%  SECCIÓN 4 — MENÚ PRINCIPAL  (esqueleto)
+% ─────────────────────────────────────────────────────────────
+\section{Menú principal}
+
+\textit{[Contenido completo en el documento final]}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{img/menu_minijuegos_page.png}
+  % IMAGEN REQUERIDA: captura de la pestaña "Minijuegos" del menú
+  \caption{Pestaña Minijuegos — vista completa.}
+  \label{fig:menu_minijuegos}
+\end{figure}
+
+% ─────────────────────────────────────────────────────────────
+%  SECCIÓN 5 — MINIJUEGO AR  (subsección de muestra)
+% ─────────────────────────────────────────────────────────────
+\section{Minijuego AR: Cepillado con Realidad Aumentada}
+
+\subsection{Acceso al minijuego}
+
+Desde la pantalla principal, toque la tarjeta \textbf{«Cepillado AR»} y luego el botón
+\textbf{«Jugar»}. La aplicación abrirá la cámara frontal y comenzará a buscar su rostro.
+
+\subsection{Detección de rostro}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.44\textwidth}
+    \includegraphics[width=\textwidth]{img/ar_buscando_rostro.png}
+    % IMAGEN REQUERIDA: pantalla de inicio del AR con overlay "Buscando rostro..."
+    \caption{Buscando rostro\ldots}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.44\textwidth}
+    \includegraphics[width=\textwidth]{img/ar_rostro_detectado.png}
+    % IMAGEN REQUERIDA: pantalla de inicio con cara detectada y botones activos
+    \caption{Rostro detectado — botones habilitados.}
+  \end{subfigure}
+  \caption{Estados de la pantalla de inicio del minijuego AR.}
+  \label{fig:ar_face_detection}
+\end{figure}
+
+Apunte la cámara frontal hacia su rostro. Cuando la aplicación detecte su cara, los botones
+de selección de modo se habilitarán automáticamente.
+
+\begin{tipbox}
+  Para una mejor detección, asegúrese de estar en un lugar bien iluminado y de tener el
+  rostro completamente visible en la pantalla.
+\end{tipbox}
+
+\subsection{Selección de modo de juego}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{img/ar_seleccion_modo.png}
+  % IMAGEN REQUERIDA: pantalla de inicio con los dos botones: "Dinámico" y "Solo guía"
+  \caption{Pantalla de selección de modo.}
+  \label{fig:ar_modo}
+\end{figure}
+
+BrushHeroes AR ofrece dos modos de juego:
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Modo Dinámico:} el jugador arrastra su dedo por la pantalla para mover el
+        cepillo virtual sobre las bacterias. Cuenta con un cronómetro de 3 minutos.
+  \item \textbf{Modo Solo Guía:} el cepillo se mueve automáticamente, mostrando la técnica
+        correcta. Ideal para niños más pequeños o para aprender la rutina. Sin límite de tiempo.
+\end{itemize}
+
+\subsubsection{Modo Dinámico — ¿Cómo jugar?}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{img/ar_dinamico_gameplay.png}
+  % IMAGEN REQUERIDA: gameplay modo dinámico — cara con bacterias visibles,
+  %   cepillo virtual posicionado, HUD en la parte superior
+  \caption{Modo Dinámico en acción.}
+  \label{fig:ar_dinamico}
+\end{figure}
+
+\begin{enumerate}[leftmargin=1.5cm]
+  \item Las bacterias aparecerán sobre distintas zonas de su boca.
+  \item \textbf{Arrastre su dedo} por la pantalla para mover el cepillo virtual.
+  \item Pase el cepillo sobre todas las bacterias de la zona activa para limpiarla.
+  \item Al limpiar una zona, aparecerá una notificación y pasará a la siguiente.
+  \item Complete las 6 zonas antes de que se acabe el tiempo para ganar.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────
+%  SECCIÓN 6 — PROGRESO (esqueleto)
+% ─────────────────────────────────────────────────────────────
+\section{Sistema de progreso}
+
+\textit{[Contenido completo en el documento final]}
+
+% ─────────────────────────────────────────────────────────────
+%  SECCIÓN 7 — PREGUNTAS FRECUENTES  (muestra parcial)
+% ─────────────────────────────────────────────────────────────
+\section{Preguntas frecuentes}
+
+\subsection*{¿Por qué la cámara no detecta mi rostro?}
+Asegúrese de estar en un lugar bien iluminado. Si el problema persiste, verifique que su
+dispositivo sea compatible con Google ARCore.
+
+\subsection*{¿Se pierde mi progreso si desinstalo la app?}
+Sí. El progreso se guarda localmente en el dispositivo. Desinstalar la aplicación eliminará
+todos los datos guardados.
+
+\subsection*{¿Necesito conexión a internet?}
+No. BrushHeroes funciona completamente sin conexión una vez instalado.
+
+\subsection*{¿Puedo usar auriculares?}
+Sí. El juego tiene efectos de sonido y música de fondo. El uso de auriculares es opcional.
+
+\vfill
+\begin{center}
+  \small\color{heroGray}
+  BrushHeroes · Proyecto de Grado · \the\year \\
+  Documento generado para revisión de formato
+\end{center}
+
+\end{document}

@@ -1,0 +1,841 @@
+% ============================================================
+%  BrushHeroes — Manual de Usuario
+%  Pontificia Universidad Javeriana · Ingeniería de Sistemas
+% ============================================================
+\documentclass[12pt, a4paper]{article}
+
+% ── Paquetes ─────────────────────────────────────────────────
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+
+% Imagen segura: muestra un recuadro gris si el archivo aún no existe.
+% Cuando tenga las capturas en img/, este comando las mostrará automáticamente.
+\let\realincludegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{%
+  \IfFileExists{#2}%
+    {\realincludegraphics[#1]{#2}}%
+    {\fbox{\begin{minipage}[c][3cm][c]{0.5\textwidth}%
+       \centering\small\color{gray}%
+       \textbf{[imagen pendiente]}\\[4pt]\texttt{#2}%
+     \end{minipage}}}%
+}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{microtype}
+
+\geometry{
+  top=2.5cm, bottom=2.5cm,
+  left=3cm,  right=2.5cm
+}
+
+% ── Paleta de colores ─────────────────────────────────────────
+\definecolor{heroBlue}{HTML}{2563EB}
+\definecolor{heroGreen}{HTML}{22C55E}
+\definecolor{heroOrange}{HTML}{F97316}
+\definecolor{heroRed}{HTML}{EF4444}
+\definecolor{heroGray}{HTML}{64748B}
+\definecolor{heroBg}{HTML}{F0F9FF}
+\definecolor{heroLightGray}{HTML}{F8FAFC}
+
+% ── Tipografía de secciones ───────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{heroBlue}}
+  {\thesection.}{0.8em}{}[\vspace{-4pt}\rule{\linewidth}{0.6pt}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{heroBlue!80!black}}
+  {\thesubsection.}{0.6em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{heroGray}}
+  {\thesubsubsection.}{0.5em}{}
+
+\titlespacing{\section}{0pt}{18pt}{8pt}
+\titlespacing{\subsection}{0pt}{12pt}{4pt}
+\titlespacing{\subsubsection}{0pt}{8pt}{2pt}
+
+% ── Cajas de aviso ────────────────────────────────────────────
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{notebox}[1][Nota]{
+  colback=heroBg, colframe=heroBlue,
+  fonttitle=\bfseries\small, title=#1,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt, boxrule=0.8pt
+}
+
+\newtcolorbox{tipbox}[1][Consejo]{
+  colback=heroGreen!8, colframe=heroGreen!55!black,
+  fonttitle=\bfseries\small, title=#1,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt, boxrule=0.8pt
+}
+
+\newtcolorbox{warnbox}[1][Importante]{
+  colback=heroOrange!8, colframe=heroOrange,
+  fonttitle=\bfseries\small, title=#1,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt, boxrule=0.8pt
+}
+
+% ── Encabezado y pie de página ────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{heroGray}BrushHeroes}
+\fancyhead[R]{\small\color{heroGray}\leftmark}
+\fancyfoot[C]{\small\color{heroGray}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{heroBlue!30}\leaders\hrule height \headrulewidth\hfill}}
+
+% ── Estilo de figuras ─────────────────────────────────────────
+\captionsetup{
+  font=small,
+  labelfont={bf,color=heroGray},
+  textfont={color=heroGray},
+  belowskip=4pt
+}
+
+% ── Metadatos PDF ─────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=heroBlue,
+  urlcolor=heroBlue,
+  pdftitle={BrushHeroes - Manual de Usuario},
+  pdfauthor={Equipo BrushHeroes - PUJ},
+  pdfsubject={Manual de Usuario}
+}
+
+% ── Comando para placeholder de imagen ───────────────────────
+% Útil mientras no se tienen las capturas finales.
+% Uso: \imgplaceholder{ancho}{alto}{nombre_archivo.png}{descripción}
+\newcommand{\imgplaceholder}[4]{%
+  \begin{figure}[H]
+    \centering
+    \fbox{\begin{minipage}[c][#2][c]{#1}
+      \centering
+      \small\color{heroGray}
+      \textbf{IMAGEN PENDIENTE}\\[4pt]
+      \texttt{img/#3}\\[4pt]
+      #4
+    \end{minipage}}
+  \end{figure}%
+}
+
+% ─────────────────────────────────────────────────────────────
+\begin{document}
+
+% ── PORTADA ──────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+
+  {\small\color{heroGray} PONTIFICIA UNIVERSIDAD JAVERIANA}\\[0.2cm]
+  {\small\color{heroGray} FACULTAD DE INGENIERÍA — INGENIERÍA DE SISTEMAS}\\[0.6cm]
+  \rule{0.7\textwidth}{0.8pt}
+
+  \vspace{1.8cm}
+
+  % Reemplace el bloque siguiente por \includegraphics cuando tenga el logo:
+  % \includegraphics[width=0.42\textwidth]{img/portada_logo.png}
+  \begin{tcolorbox}[
+    colback=heroBlue!8, colframe=heroBlue,
+    width=0.55\textwidth, halign=center,
+    arc=8pt, boxrule=1.2pt,
+    top=18pt, bottom=18pt
+  ]
+    \centering
+    {\LARGE\bfseries\color{heroBlue} BrushHeroes}\\[4pt]
+    {\small\color{heroGray} Videojuego educativo de higiene bucal}
+  \end{tcolorbox}
+  % NOTA: reemplazar el tcolorbox anterior por el logo cuando esté disponible.
+
+  \vspace{1.8cm}
+
+  {\huge\bfseries Manual de Usuario}\\[0.6cm]
+  {\large\color{heroGray} Guía completa para el jugador}
+
+  \vspace{1.5cm}
+  \rule{0.5\textwidth}{0.4pt}\\[0.8cm]
+
+  \begin{tabular}{r l}
+    \color{heroGray}Plataforma:   & Android (Realidad Aumentada) \\
+    \color{heroGray}Versión:      & 1.0 \\
+    \color{heroGray}Fecha:        & \today \\
+  \end{tabular}
+
+  \vfill
+  {\small\color{heroGray} Proyecto de Grado · Ingeniería de Sistemas\\
+  Pontificia Universidad Javeriana · \the\year}
+\end{titlepage}
+
+% ── TABLA DE CONTENIDOS ───────────────────────────────────────
+\renewcommand{\contentsname}{Tabla de contenidos}
+\tableofcontents
+\newpage
+
+% =============================================================
+\section{Introducción}
+% =============================================================
+
+\textbf{BrushHeroes} es una aplicación móvil educativa diseñada para motivar a los niños a
+desarrollar y mantener buenos hábitos de higiene bucal. A través de minijuegos interactivos y un
+sistema de progreso gamificado —inspirado en aplicaciones como Duolingo— el jugador aprende la
+técnica correcta de cepillado y uso del hilo dental de una manera entretenida y accesible.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\textwidth]{img/intro_menu_general.png}
+  % IMAGEN: captura completa del menú principal (pestaña Minijuegos, scroll al tope).
+  \caption{Pantalla principal de BrushHeroes.}
+  \label{fig:intro_menu}
+\end{figure}
+
+\subsection{¿A quién está dirigido?}
+
+BrushHeroes está diseñado principalmente para niños entre 4 y 10 años, aunque puede ser
+utilizado por cualquier persona. Para los más pequeños se recomienda la supervisión de un adulto
+durante la configuración inicial y las primeras sesiones de juego.
+
+\subsection{Minijuegos disponibles}
+
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item \textbf{Cepillado con Realidad Aumentada (AR):} usa la cámara frontal del dispositivo
+        para superponer bacterias y un cepillo virtual sobre el rostro del jugador, guiándolo por
+        las seis zonas de cepillado de la boca.
+  \item \textbf{Cepillado interactivo:} práctica de la técnica de cepillado mediante un
+        minijuego en orientación horizontal.
+  \item \textbf{Hilo dental:} aprende a usar el hilo dental correctamente con un minijuego
+        interactivo.
+\end{itemize}
+
+\subsection{Sistema de progreso}
+
+Además de los minijuegos, BrushHeroes incluye:
+
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item \textbf{Racha de días:} registra cuántos días consecutivos ha jugado el usuario.
+  \item \textbf{Estrellas:} recompensas obtenidas al completar sesiones.
+  \item \textbf{Misiones diarias:} sesión de mañana y sesión de tarde.
+  \item \textbf{Calendario de actividad:} visualización del historial del mes con código de color.
+\end{itemize}
+
+\begin{notebox}
+  Esta aplicación \textbf{no reemplaza} la instrucción de un profesional de salud bucal.
+  Su propósito es reforzar hábitos de higiene de forma lúdica.
+\end{notebox}
+
+% =============================================================
+\section{Requisitos del sistema}
+% =============================================================
+
+Para instalar y ejecutar BrushHeroes correctamente, el dispositivo debe cumplir con los
+siguientes requisitos mínimos:
+
+\begin{table}[H]
+  \centering
+  \caption{Requisitos mínimos del dispositivo.}
+  \label{tab:requisitos}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{>{\bfseries\color{heroGray}}p{4.2cm} p{8.5cm}}
+    \toprule
+    \color{black}Componente & \color{black}Requisito \\
+    \midrule
+    Sistema operativo  & Android 9.0 (API 28) o superior \\
+    Procesador         & Octa-core 2.0\,GHz o superior \\
+    Memoria RAM        & 3\,GB mínimo (4\,GB recomendado) \\
+    Almacenamiento     & 300\,MB de espacio libre \\
+    Cámara frontal     & Requerida para el minijuego AR (mínimo 5\,MP) \\
+    Soporte AR         & Compatible con Google ARCore \\
+    Conexión a red     & No requerida para jugar \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{warnbox}
+  El \textbf{minijuego de Realidad Aumentada} requiere que el dispositivo sea compatible con
+  \textbf{Google ARCore}. Puede consultar la lista oficial de dispositivos compatibles en:
+  \url{https://developers.google.com/ar/devices}
+\end{warnbox}
+
+% =============================================================
+\section{Instalación}
+% =============================================================
+
+\subsection{Instalación desde archivo APK}
+
+BrushHeroes se distribuye como un archivo \texttt{.apk} que debe instalarse manualmente en
+el dispositivo Android. Siga estos pasos:
+
+\begin{enumerate}[leftmargin=1.8cm, itemsep=6pt]
+  \item Descargue el archivo \texttt{BrushHeroes.apk} desde el enlace proporcionado por su
+        institución educativa y guárdelo en el dispositivo.
+
+  \item En su dispositivo, vaya a \textbf{Ajustes $\rightarrow$ Seguridad} (o
+        \textbf{Ajustes $\rightarrow$ Aplicaciones $\rightarrow$ Instalar apps desconocidas}) y habilite la opción
+        \textit{«Permitir instalación de fuentes desconocidas»}.
+
+        \begin{figure}[H]
+          \centering
+          \includegraphics[width=0.38\textwidth]{img/install_fuentes_desconocidas.png}
+          % IMAGEN: ajustes de Android mostrando la opción de fuentes desconocidas habilitada.
+          \caption{Activar instalación desde fuentes desconocidas.}
+          \label{fig:install_fuentes}
+        \end{figure}
+
+  \item Abra el archivo \texttt{BrushHeroes.apk} desde el administrador de archivos del
+        dispositivo. Aparecerá un diálogo de confirmación; toque \textbf{Instalar}.
+
+        \begin{figure}[H]
+          \centering
+          \includegraphics[width=0.38\textwidth]{img/install_dialogo.png}
+          % IMAGEN: diálogo de Android "¿Desea instalar esta aplicación?" con botón Instalar.
+          \caption{Diálogo de instalación del APK.}
+          \label{fig:install_dialogo}
+        \end{figure}
+
+  \item Espere a que finalice la instalación. Al completarse, toque \textbf{Abrir} para
+        iniciar la aplicación, o búsquela en su lanzador de aplicaciones bajo el nombre
+        \textbf{BrushHeroes}.
+\end{enumerate}
+
+\begin{tipbox}
+  Si el dispositivo muestra una advertencia sobre aplicaciones de fuentes desconocidas,
+  es normal para aplicaciones distribuidas fuera de la Play Store. El archivo es seguro.
+\end{tipbox}
+
+\subsection{Primer inicio}
+
+Al abrir la aplicación por primera vez, el sistema generará automáticamente un perfil de
+jugador con datos de ejemplo para el calendario de actividad. No es necesario crear una cuenta.
+
+% =============================================================
+\section{Menú principal}
+% =============================================================
+
+Al iniciar la aplicación se mostrará el menú principal. La pantalla está organizada en dos
+pestañas accesibles desde la barra de navegación inferior: \textbf{Minijuegos} y
+\textbf{Calendario}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\textwidth]{img/menu_completo.png}
+  % IMAGEN: captura completa del menú — pestaña Minijuegos visible, scroll al tope,
+  %         mascota, racha, estrellas y las 3 tarjetas todas visibles.
+  \caption{Menú principal — pestaña Minijuegos.}
+  \label{fig:menu_completo}
+\end{figure}
+
+\subsection{Panel del héroe}
+
+En la parte superior de la pestaña Minijuegos se encuentra el \textbf{panel del héroe}, que
+muestra de un vistazo el estado de progreso del jugador:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\textwidth]{img/menu_hero_panel.png}
+  % IMAGEN: primer plano del panel superior — mascota animada a la izquierda,
+  %         llama de racha con número de días, estrella con contador,
+  %         chips "Mañana" y "Tarde" (idealmente uno con ✓ y otro sin él),
+  %         mensaje motivacional abajo.
+  \caption{Panel del héroe con racha, estrellas y misiones diarias.}
+  \label{fig:hero_panel}
+\end{figure}
+
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item \textbf{Mascota:} personaje animado cuyo estado refleja el desempeño del jugador.
+        Si la racha es alta, la mascota celebra; si no ha jugado en varios días, se muestra triste.
+  \item \textbf{Racha}: número de días consecutivos en los que el jugador ha
+        completado al menos una sesión. ¡Intente mantenerla activa!
+  \item \textbf{Estrellas}: total de estrellas acumuladas completando sesiones de juego.
+  \item \textbf{Misión Mañana / Tarde:} indica si ya completó la sesión de cepillado de la
+        mañana o de la tarde en el día actual. Aparece una marca $\checkmark$ al completarla.
+  \item \textbf{Mensaje motivacional:} texto dinámico que cambia según la racha actual.
+\end{itemize}
+
+\subsection{Tarjetas de minijuegos}
+
+Debajo del panel del héroe se encuentran las tres tarjetas de acceso a los minijuegos.
+Cada tarjeta muestra el nombre del juego y una breve descripción.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\textwidth]{img/menu_cards.png}
+  % IMAGEN: las 3 tarjetas visibles — ARCard, BrushCard y FlossCard,
+  %         haciendo scroll down si es necesario para verlas todas.
+  \caption{Tarjetas de los tres minijuegos disponibles.}
+  \label{fig:menu_cards}
+\end{figure}
+
+Para ingresar a un minijuego, toque el botón \textbf{«Jugar»} en la tarjeta correspondiente.
+
+\begin{notebox}
+  El minijuego de \textbf{Cepillado AR} requiere la cámara frontal del dispositivo.
+  Los minijuegos de \textbf{Cepillado interactivo} y \textbf{Hilo Dental} se ejecutan en
+  orientación horizontal; el dispositivo rotará automáticamente al ingresar.
+\end{notebox}
+
+\subsection{Pestaña Calendario}
+
+Toque el ícono \textbf{Calendario} en la barra inferior para ver el historial de actividad
+del mes actual.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\textwidth]{img/menu_calendario.png}
+  % IMAGEN: pestaña Calendario completa — encabezado con mes/año y flechas de navegación,
+  %         grid con días coloreados, leyenda de colores en la parte inferior.
+  \caption{Pestaña Calendario con historial de actividad.}
+  \label{fig:calendario}
+\end{figure}
+
+Cada celda del calendario representa un día del mes y se colorea según el desempeño:
+
+\begin{table}[H]
+  \centering
+  \caption{Código de colores del calendario.}
+  \label{tab:colores_calendario}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{>{\centering\arraybackslash}p{1.5cm} p{9cm}}
+    \toprule
+    \textbf{Color} & \textbf{Significado} \\
+    \midrule
+    \textcolor{heroGreen}{\rule{1.2cm}{0.4cm}}  & $\geq$ 80\% de sesiones completadas (excelente) \\
+    \textcolor{yellow!60!orange}{\rule{1.2cm}{0.4cm}} & $\geq$ 50\% de sesiones completadas (bien) \\
+    \textcolor{heroOrange}{\rule{1.2cm}{0.4cm}} & Al menos una sesión completada \\
+    \textcolor{heroRed!70}{\rule{1.2cm}{0.4cm}} & Día sin actividad (perdido) \\
+    \textcolor{heroBlue}{\rule{1.2cm}{0.4cm}}   & Día de hoy \\
+    \textcolor{gray!30}{\rule{1.2cm}{0.4cm}}    & Días futuros (sin datos) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Use las flechas \textbf{«\textless»} y \textbf{«\textgreater»} en el encabezado del calendario
+para navegar entre meses anteriores y el mes actual.
+
+% =============================================================
+\section{Minijuego AR: Cepillado con Realidad Aumentada}
+% =============================================================
+
+El minijuego de Realidad Aumentada es la experiencia principal de BrushHeroes. Usa la cámara
+frontal del dispositivo para detectar el rostro del jugador y superponer elementos virtuales
+(bacterias y un cepillo de dientes) sobre su imagen en tiempo real.
+
+\subsection{Cómo acceder}
+
+Desde el menú principal, toque la tarjeta \textbf{«Cepillado AR»} y luego el botón
+\textbf{«Jugar»}. La aplicación abrirá la cámara frontal y mostrará la pantalla de inicio del
+minijuego.
+
+\subsection{Detección de rostro}
+
+Al entrar al minijuego, la aplicación buscará automáticamente su rostro. Mientras no lo
+detecte, los botones de inicio permanecerán bloqueados y se mostrará un aviso en pantalla.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[width=\textwidth]{img/ar_buscando_rostro.png}
+    % IMAGEN: pantalla de inicio AR con overlay visible "Buscando rostro..."
+    %         (botones de modo en gris/deshabilitados).
+    \caption{Buscando rostro\ldots}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[width=\textwidth]{img/ar_rostro_detectado.png}
+    % IMAGEN: misma pantalla pero con cara detectada y overlay ocultado
+    %         (botones de modo en color/habilitados).
+    \caption{Rostro detectado.}
+  \end{subfigure}
+  \caption{Estados de la pantalla de inicio: buscando y encontrando el rostro.}
+  \label{fig:ar_deteccion}
+\end{figure}
+
+\begin{tipbox}
+  Para una detección óptima: colóquese en un lugar bien iluminado, a unos 30--50\,cm de
+  la pantalla, y asegúrese de que su cara esté completamente visible y centrada.
+\end{tipbox}
+
+\subsection{Selección de modo de juego}
+
+Una vez detectado el rostro, podrá elegir entre dos modos de juego:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\textwidth]{img/ar_seleccion_modo.png}
+  % IMAGEN: pantalla de inicio con los dos botones activos y visibles:
+  %         "Dinámico" y "Solo guía".
+  \caption{Pantalla de selección de modo.}
+  \label{fig:ar_modos}
+\end{figure}
+
+\begin{itemize}[leftmargin=1.8cm, itemsep=6pt]
+  \item \textbf{Modo Dinámico:} el jugador controla el cepillo virtual arrastrando su dedo
+        por la pantalla. Debe limpiar todas las zonas de la boca antes de que se agoten los
+        3 minutos. Recomendado para niños que ya conocen la dinámica del juego.
+  \item \textbf{Modo Solo Guía:} el cepillo se mueve automáticamente sobre cada zona,
+        mostrando la técnica correcta de cepillado. No tiene límite de tiempo. Ideal para
+        el primer contacto con el juego o para niños más pequeños.
+\end{itemize}
+
+\subsection{Modo Dinámico}
+
+\subsubsection{Objetivo}
+
+Limpie las \textbf{seis zonas de la boca} eliminando todas las bacterias de cada zona antes
+de que se acaben los \textbf{3 minutos} (180 segundos).
+
+\subsubsection{Cómo jugar}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\textwidth]{img/ar_dinamico_gameplay.png}
+  % IMAGEN: gameplay modo Dinámico — cara del jugador con bacterias animadas visibles
+  %         sobre alguna zona, cepillo virtual posicionado sobre ellas,
+  %         HUD en la parte superior (puntos, 6 dots de zona, cronómetro).
+  \caption{Modo Dinámico en acción: bacterias sobre la zona activa y cepillo virtual.}
+  \label{fig:ar_dinamico}
+\end{figure}
+
+\begin{enumerate}[leftmargin=1.8cm, itemsep=5pt]
+  \item Al comenzar la sesión, las bacterias aparecerán sobre la \textbf{primera zona activa}
+        de su boca.
+  \item \textbf{Arrastre su dedo por la pantalla} para mover el cepillo virtual. El cepillo
+        sigue el movimiento de su dedo en tiempo real.
+  \item Pase el cepillo sobre las bacterias para eliminarlas. Escuchará un sonido al
+        destruir cada bacteria.
+  \item Cuando todas las bacterias de la zona activa sean eliminadas, se avanzará
+        automáticamente a la siguiente zona. Una notificación indicará el cambio.
+  \item Complete las \textbf{seis zonas} para ganar la sesión.
+\end{enumerate}
+
+\subsubsection{Las seis zonas de cepillado}
+
+El juego cubre las mismas zonas que recomienda limpiar un odontólogo:
+
+\begin{table}[H]
+  \centering
+  \caption{Zonas de cepillado del minijuego AR.}
+  \label{tab:zonas}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{>{\bfseries}p{4cm} p{8cm}}
+    \toprule
+    Zona & Ubicación \\
+    \midrule
+    Superior izquierda  & Molares y premolares superiores del lado izquierdo \\
+    Superior derecha    & Molares y premolares superiores del lado derecho \\
+    Frontal superior    & Incisivos y caninos superiores (dientes frontales arriba) \\
+    Inferior izquierda  & Molares y premolares inferiores del lado izquierdo \\
+    Inferior derecha    & Molares y premolares inferiores del lado derecho \\
+    Frontal inferior    & Incisivos y caninos inferiores (dientes frontales abajo) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Modo Solo Guía}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.52\textwidth]{img/ar_guiado_gameplay.png}
+  % IMAGEN: modo Solo Guía — cepillo animado moviéndose con un movimiento de vaivén
+  %         sobre una zona de la boca. Sin HUD de puntos ni cronómetro visibles.
+  \caption{Modo Solo Guía: el cepillo se mueve automáticamente sobre cada zona.}
+  \label{fig:ar_guiado}
+\end{figure}
+
+En este modo el jugador no necesita tocar la pantalla. El cepillo virtual recorre cada zona
+de la boca con el movimiento correcto de cepillado. Las bacterias se eliminan solas de forma
+secuencial, permitiendo al jugador observar la técnica.
+
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item No hay cronómetro ni puntuación en este modo.
+  \item La sesión avanza zona por zona de manera automática.
+  \item Una guía visual en la parte inferior indica la zona que se está cepillando en ese momento.
+\end{itemize}
+
+\begin{tipbox}
+  Use el \textbf{Modo Solo Guía} la primera vez para aprender el recorrido correcto de
+  cepillado antes de intentar el Modo Dinámico.
+\end{tipbox}
+
+\subsection{HUD durante el juego}
+
+Durante una sesión en \textbf{Modo Dinámico}, la barra superior de la pantalla muestra la
+información de la sesión en tiempo real:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{img/ar_hud_detalle.png}
+  % IMAGEN: primer plano del HUD superior — panel de puntuación a la izquierda,
+  %         6 puntos de zona en el centro (algunos verdes, uno amarillo, resto gris),
+  %         cronómetro a la derecha mostrando segundos restantes.
+  \caption{HUD de juego: puntuación, progreso de zonas y cronómetro.}
+  \label{fig:ar_hud}
+\end{figure}
+
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item \textbf{Puntuación} (izquierda): puntos acumulados en la sesión actual.
+        Aumenta al eliminar bacterias.
+  \item \textbf{Indicadores de zona} (centro): seis puntos que representan las seis zonas.
+        \begin{itemize}
+          \item \textcolor{heroGreen}{\textbf{Verde}}: zona completada.
+          \item \textcolor{yellow!70!orange}{\textbf{Amarillo}}: zona activa (en progreso).
+          \item \textcolor{gray}{\textbf{Gris}}: zona pendiente.
+        \end{itemize}
+  \item \textbf{Cronómetro} (derecha): segundos restantes de la sesión. Solo visible en
+        Modo Dinámico.
+\end{itemize}
+
+\subsection{Guía de zona}
+
+En la parte inferior de la pantalla, durante toda la sesión, se muestra una animación que
+indica la zona que debe cepillarse en ese momento.
+
+\subsection{Notificación de zona}
+
+Al completar una zona, aparece brevemente una notificación en pantalla que muestra el nombre
+de la siguiente zona a cepillar.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\textwidth]{img/ar_zona_notificacion.png}
+  % IMAGEN: overlay de notificación de zona — fondo semitransparente oscuro,
+  %         nombre de la nueva zona en texto grande, icono/imagen de la zona.
+  \caption{Notificación al completar una zona y pasar a la siguiente.}
+  \label{fig:ar_zona_notif}
+\end{figure}
+
+\subsection{Pausa}
+
+Durante el juego puede pausar la sesión tocando el botón de pausa. El tiempo se detendrá
+y aparecerá el menú de pausa con las siguientes opciones:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\textwidth]{img/ar_pausa.png}
+  % IMAGEN: pantalla de pausa — overlay oscuro con opciones
+  %         "Continuar" y "Salir al Menú".
+  \caption{Menú de pausa.}
+  \label{fig:ar_pausa}
+\end{figure}
+
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item \textbf{Continuar:} reanuda la sesión desde donde se pausó.
+  \item \textbf{Salir al Menú:} abandona la sesión y regresa al menú principal.
+\end{itemize}
+
+\subsection{Pantalla de resultado}
+
+Al finalizar la sesión (por completar todas las zonas o por agotar el tiempo), se muestra
+la pantalla de resultado:
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[width=\textwidth]{img/ar_resultado_exito.png}
+    % IMAGEN: pantalla de resultado exitoso — "¡Excelente!"
+    %         "¡Limpiaste todos tus dientes!" + puntuación final + animación celebración.
+    \caption{Resultado exitoso.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.42\textwidth}
+    \includegraphics[width=\textwidth]{img/ar_resultado_fallo.png}
+    % IMAGEN: pantalla de resultado fallido — "¡Tiempo agotado!"
+    %         "¡Inténtalo de nuevo, tú puedes!" + puntuación final.
+    \caption{Tiempo agotado.}
+  \end{subfigure}
+  \caption{Pantallas de resultado al finalizar la sesión AR.}
+  \label{fig:ar_resultado}
+\end{figure}
+
+Desde esta pantalla puede:
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item \textbf{Reintentar:} iniciar una nueva sesión del mismo minijuego.
+  \item \textbf{Volver al menú:} regresar al menú principal.
+\end{itemize}
+
+% =============================================================
+\section{Minijuego: Cepillado interactivo}
+% =============================================================
+
+El minijuego de Cepillado interactivo se ejecuta en orientación horizontal. Al tocarlo desde
+el menú, el dispositivo rotará automáticamente.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{img/brush_gameplay.png}
+  % IMAGEN: gameplay del minijuego BrushingGame en landscape —
+  %         mostrar la pantalla principal del juego con los elementos interactivos.
+  \caption{Minijuego de Cepillado interactivo.}
+  \label{fig:brush_game}
+\end{figure}
+
+\subsection{Objetivo}
+
+% TODO: completar con la descripción específica del minijuego de cepillado.
+% Descripción provisional:
+Siga las instrucciones en pantalla para cepillar correctamente cada zona de los dientes.
+Complete la rutina completa de cepillado para ganar estrellas.
+
+\subsection{Cómo volver al menú}
+
+Utilice el botón de retroceso del dispositivo o el botón de menú disponible en pantalla
+para regresar al menú principal.
+
+% =============================================================
+\section{Minijuego: Hilo Dental}
+% =============================================================
+
+El minijuego de Hilo Dental también se ejecuta en orientación horizontal.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{img/floss_gameplay.png}
+  % IMAGEN: gameplay del minijuego DentalFlossGame en landscape —
+  %         mostrar la pantalla principal con los elementos del juego.
+  \caption{Minijuego de Hilo Dental.}
+  \label{fig:floss_game}
+\end{figure}
+
+\subsection{Objetivo}
+
+% TODO: completar con la descripción específica del minijuego de hilo dental.
+% Descripción provisional:
+Aprenda a pasar el hilo dental correctamente entre los dientes siguiendo las indicaciones
+visuales en pantalla. Complete todas las piezas dentales para finalizar la sesión.
+
+\subsection{Cómo volver al menú}
+
+Utilice el botón de retroceso del dispositivo o el botón de menú disponible en pantalla
+para regresar al menú principal.
+
+% =============================================================
+\section{Sistema de progreso}
+% =============================================================
+
+BrushHeroes lleva un registro del desempeño del jugador a lo largo del tiempo para motivar
+la constancia en la higiene bucal.
+
+\subsection{Racha de días}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{img/progreso_racha.png}
+  % IMAGEN: primer plano del badge de racha en el panel del héroe —
+  %         llama animada con el número de días (idealmente 5+ para que se vea bien).
+  \caption{Indicador de racha de días consecutivos.}
+  \label{fig:racha}
+\end{figure}
+
+La \textbf{racha} aumenta en uno cada día en que el jugador completa al menos una sesión de
+juego. Si se pierde un día sin jugar, la racha vuelve a cero.
+
+La mascota del panel principal refleja el estado de la racha:
+
+\begin{table}[H]
+  \centering
+  \caption{Estado de la mascota según la racha.}
+  \label{tab:mascota}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{>{\bfseries}p{4cm} p{8cm}}
+    \toprule
+    Racha & Estado de la mascota \\
+    \midrule
+    7 días o más  & Celebrando — animación de festejo \\
+    3 a 6 días    & Feliz — animación de saludo \\
+    1 a 2 días    & Neutral \\
+    0 días        & Triste \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Estrellas}
+
+Las \textbf{estrellas} se acumulan completando sesiones de juego. El total se muestra en el
+panel del héroe junto al ícono de estrella.
+
+\subsection{Misiones diarias}
+
+Cada día el jugador tiene dos misiones:
+\begin{itemize}[leftmargin=1.8cm, itemsep=4pt]
+  \item \textbf{Misión de Mañana:} completar una sesión de juego durante la mañana.
+  \item \textbf{Misión de Tarde:} completar una sesión de juego durante la tarde.
+\end{itemize}
+
+Al completar una misión, el chip correspondiente en el panel del héroe mostrará una marca $\checkmark$.
+
+\subsection{Calendario de actividad}
+
+El \textbf{calendario} de la pestaña Calendario muestra el historial del mes actual con
+código de colores (ver tabla~\ref{tab:colores_calendario}). Use las flechas de navegación
+para ver meses anteriores.
+
+\begin{notebox}
+  Los datos del calendario se guardan localmente en el dispositivo. Si desinstala la
+  aplicación, el historial se perderá.
+\end{notebox}
+
+% =============================================================
+\section{Preguntas frecuentes}
+% =============================================================
+
+\subsubsection*{¿Por qué la cámara no detecta mi rostro?}
+Asegúrese de estar en un lugar con buena iluminación y de que su cara esté completamente
+visible frente a la cámara, a unos 30--50\,cm de distancia. Si el problema persiste,
+verifique que su dispositivo sea compatible con Google ARCore
+(\url{https://developers.google.com/ar/devices}).
+
+\subsubsection*{¿Qué hago si el juego se ve lento o con interrupciones?}
+Cierre otras aplicaciones en segundo plano y reinicie la aplicación. Si el dispositivo no
+cumple los requisitos mínimos (ver sección~\ref{tab:requisitos}), el rendimiento puede verse afectado.
+
+\subsubsection*{¿Se pierde mi progreso si cierro la aplicación?}
+No. El progreso (racha, estrellas, historial) se guarda automáticamente en el dispositivo
+cada vez que regresa al menú principal.
+
+\subsubsection*{¿Se pierde mi progreso si desinstalo la app?}
+Sí. Los datos se almacenan localmente. Desinstalar la aplicación eliminará todo el
+historial y el progreso acumulado.
+
+\subsubsection*{¿Necesito conexión a internet para jugar?}
+No. BrushHeroes funciona completamente sin conexión a internet una vez instalado.
+
+\subsubsection*{¿Puedo usar auriculares?}
+Sí. El juego incluye efectos de sonido y música de fondo. Los auriculares son opcionales.
+
+\subsubsection*{¿El juego funciona con luz tenue?}
+La detección de rostro para el minijuego AR requiere iluminación razonable. En condiciones
+de poca luz el reconocimiento facial puede fallar o ser intermitente.
+
+\subsubsection*{¿Cuánto tiempo dura una sesión?}
+En \textbf{Modo Dinámico} la sesión dura máximo 3 minutos (180 segundos).
+En \textbf{Modo Solo Guía} no hay límite de tiempo.
+
+\subsubsection*{¿Para qué sirve el Modo Solo Guía?}
+Está diseñado para enseñar la técnica de cepillado correcta de manera pasiva. Es ideal
+para niños que usan la aplicación por primera vez o para adultos que la utilizan como
+material de demostración.
+
+% ── FIN DEL DOCUMENTO ────────────────────────────────────────
+\vfill
+\begin{center}
+  \small\color{heroGray}\rule{0.5\textwidth}{0.4pt}\\[6pt]
+  BrushHeroes · Manual de Usuario · Versión 1.0\\
+  Pontificia Universidad Javeriana · Ingeniería de Sistemas · \the\year
+\end{center}
+
+\end{document}
