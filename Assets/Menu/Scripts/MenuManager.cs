@@ -9,7 +9,7 @@ public class MenuManager : MonoBehaviour
 {
     const string SCENE_AR    = "ARGame";
     const string SCENE_BRUSH = "BrushingGame";
-    const string SCENE_FLOSS = "DentalFlossGame";
+    const string SCENE_FLOSS = "Start";
 
     [Header("Stats UI")]
     [SerializeField] TextMeshProUGUI streakText;

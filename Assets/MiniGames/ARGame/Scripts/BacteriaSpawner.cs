@@ -36,6 +36,17 @@ public class BacteriaSpawner : MonoBehaviour
     readonly List<GameObject> spawnedBacteria = new List<GameObject>();
     private Dictionary<MouthZone, ZoneData> zones = new Dictionary<MouthZone, ZoneData>();
 
+    struct SavedBacteria
+    {
+        public MouthZone zone;
+        public Vector3 zoneLocalPosition;
+        public float health;
+        public int sortingOrder;
+    }
+
+    private readonly List<SavedBacteria> savedBacteriaState = new List<SavedBacteria>();
+    private bool wasPausedLastFrame;
+
     private bool isInitialized;
     private float sessionTimer;
     private float secondsIntoCurrentStep;
@@ -145,6 +156,22 @@ public class BacteriaSpawner : MonoBehaviour
 
         if (sessionManager == null || !sessionManager.IsSessionRunning)
             return;
+
+        bool isPausedNow = sessionManager.IsPaused;
+
+        // Detect transition into pause → snapshot bacteria so we can restore if AR destroys the FacePrefab.
+        if (isPausedNow && !wasPausedLastFrame)
+            SaveBacteriaState();
+
+        wasPausedLastFrame = isPausedNow;
+
+        if (isPausedNow)
+            return;
+
+        // After resume: restore saved state. Retried each frame until MouthZoneManager is available
+        // (the FacePrefab might not be re-instantiated in the same frame as resume).
+        if (savedBacteriaState.Count > 0)
+            RefreshZonesAndRestoreIfNeeded();
 
         if (bacteriaPrefab == null || zones.Count == 0)
             return;
@@ -325,6 +352,108 @@ public class BacteriaSpawner : MonoBehaviour
 
         int remaining = data.aliveCount;
         return data.currentCount >= data.maxCount && remaining == 0;
+    }
+
+    // ── Pause / face-loss state preservation ──────────────────────────────────
+
+    void SaveBacteriaState()
+    {
+        savedBacteriaState.Clear();
+        for (int i = 0; i < spawnedBacteria.Count; i++)
+        {
+            GameObject go = spawnedBacteria[i];
+            if (go == null) continue;
+            Bacteria b = go.GetComponentInChildren<Bacteria>(true);
+            if (b == null || b.IsDying) continue;
+
+            if (!zones.TryGetValue(b.Zone, out ZoneData zd) || zd.transform == null) continue;
+
+            Vector3 localPos = zd.transform.InverseTransformPoint(go.transform.position);
+            SpriteRenderer sr = go.GetComponentInChildren<SpriteRenderer>(true);
+            int sortOrder = sr != null ? sr.sortingOrder : 0;
+
+            savedBacteriaState.Add(new SavedBacteria
+            {
+                zone = b.Zone,
+                zoneLocalPosition = localPos,
+                health = b.Health,
+                sortingOrder = sortOrder
+            });
+        }
+        Debug.Log($"[BacteriaSpawner] Saved {savedBacteriaState.Count} bacteria states for face-loss recovery.");
+    }
+
+    void RefreshZonesAndRestoreIfNeeded()
+    {
+        // The FacePrefab (which holds MouthZoneManager + zone Transforms) gets destroyed by
+        // ARFaceManager when face tracking is lost. On re-detection a fresh instance appears.
+        MouthZoneManager freshManager = FindObjectOfType<MouthZoneManager>();
+        if (freshManager == null) return;
+
+        bool prefabReplaced = mouthZoneManager != freshManager;
+        if (!prefabReplaced)
+        {
+            // Same MouthZoneManager: zones and bacteria survived, nothing to do.
+            savedBacteriaState.Clear();
+            return;
+        }
+
+        Debug.Log("[BacteriaSpawner] FacePrefab was rebuilt — refreshing zone Transforms and restoring bacteria.");
+        mouthZoneManager = freshManager;
+
+        // Update zone Transform references to the new instances.
+        foreach (MouthZone zone in System.Enum.GetValues(typeof(MouthZone)))
+        {
+            if (!zones.TryGetValue(zone, out ZoneData zd)) continue;
+            zd.transform = freshManager.GetZoneTransform(zone);
+        }
+
+        // Discard dead references from the spawned-bacteria list (they're already destroyed).
+        spawnedBacteria.RemoveAll(go => go == null);
+
+        // Restore each saved bacteria at its previous local position relative to the (new) zone Transform.
+        int restored = 0;
+        for (int i = 0; i < savedBacteriaState.Count; i++)
+        {
+            SavedBacteria saved = savedBacteriaState[i];
+            if (!zones.TryGetValue(saved.zone, out ZoneData zd) || zd.transform == null) continue;
+            if (bacteriaPrefab == null) continue;
+
+            GameObject go = Instantiate(bacteriaPrefab);
+            Bacteria b = go.GetComponentInChildren<Bacteria>(true);
+            if (b == null) { Destroy(go); continue; }
+
+            b.InitializeWithHealth(this, saved.zone, saved.health);
+
+            go.transform.position = zd.transform.TransformPoint(saved.zoneLocalPosition);
+
+            SpriteRenderer sr = go.GetComponentInChildren<SpriteRenderer>(true);
+            if (sr != null) sr.sortingOrder = saved.sortingOrder;
+
+            go.transform.SetParent(zd.transform, true);
+
+            if (sessionManager != null)
+                b.ApplyTargetHighlight(saved.zone == sessionManager.CurrentZone);
+
+            spawnedBacteria.Add(go);
+            restored++;
+        }
+
+        // Recompute aliveCount from the actual surviving bacteria so IsZoneComplete stays consistent.
+        // (The Bacteria.OnDestroy that fired during FacePrefab destruction decremented aliveCount to 0.)
+        foreach (var data in zones.Values) data.aliveCount = 0;
+        for (int i = 0; i < spawnedBacteria.Count; i++)
+        {
+            GameObject go = spawnedBacteria[i];
+            if (go == null) continue;
+            Bacteria b = go.GetComponentInChildren<Bacteria>(true);
+            if (b == null || b.IsDying) continue;
+            if (zones.TryGetValue(b.Zone, out ZoneData zd))
+                zd.aliveCount++;
+        }
+
+        Debug.Log($"[BacteriaSpawner] Restored {restored} bacteria.");
+        savedBacteriaState.Clear();
     }
 
     void ClearSpawnedBacteria()

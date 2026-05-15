@@ -14,13 +14,19 @@ public class GuidedModeController : MonoBehaviour
 
     [Header("Brush Motion")]
     [Tooltip("Half-width of the brushing stroke along the zone's horizontal axis (metres)")]
-    [SerializeField] float horizontalAmplitude = 0.018f;
+    [SerializeField] float horizontalAmplitude = 0.006f;
     [Tooltip("Half-height drift along the zone's vertical axis (metres)")]
-    [SerializeField] float verticalAmplitude   = 0.008f;
+    [SerializeField] float verticalAmplitude   = 0.004f;
     [Tooltip("Horizontal oscillation speed (radians/second — ~12 ≈ 2 strokes/sec)")]
     [SerializeField] float horizontalFrequency = 12f;
     [Tooltip("Vertical drift speed (radians/second)")]
     [SerializeField] float verticalFrequency   = 2.5f;
+
+    [Header("Brush Anchor Offset")]
+    [Tooltip("Shifts the brush DOWN along the zone's up-axis so the brush HEAD (top of sprite) " +
+             "lands on the zone instead of the brush center. Increase if you see the head landing " +
+             "above the teeth (on the cheek). Tune in the Inspector.")]
+    [SerializeField] float headOffsetY = 0.04f;
 
     [Header("Timing")]
     [SerializeField] float secondsPerZone = 20f;
@@ -80,7 +86,7 @@ public class GuidedModeController : MonoBehaviour
     void Update()
     {
         if (!_active || sessionManager == null || !sessionManager.IsSessionRunning) return;
-        if (sessionManager.IsInTransition) return;
+        if (sessionManager.IsInTransition || sessionManager.IsPaused) return;
 
         // MouthZoneManager and GuidedBrushVisual live in the dynamically-instantiated FacePrefab.
         // Re-find them lazily: they may appear after Activate() (face detected late) or
@@ -102,7 +108,7 @@ public class GuidedModeController : MonoBehaviour
         Transform zoneT = mouthZoneManager.GetZoneTransform(sessionManager.CurrentZone);
         if (zoneT != null)
             _guidedBrush.transform.position =
-                zoneT.position + zoneT.right * xOff + zoneT.up * yOff;
+                zoneT.position + zoneT.right * xOff + zoneT.up * (yOff - headOffsetY);
     }
 
     // ── Sequential bacteria death ─────────────────────────────────────────────
@@ -122,7 +128,7 @@ public class GuidedModeController : MonoBehaviour
             if (!_active || sessionManager == null || !sessionManager.IsSessionRunning)
                 yield break;
 
-            while (sessionManager.IsInTransition) yield return null;
+            while (sessionManager.IsInTransition || sessionManager.IsPaused) yield return null;
 
             GameObject[] all = GameObject.FindGameObjectsWithTag("Bacteria");
             bool found = false;

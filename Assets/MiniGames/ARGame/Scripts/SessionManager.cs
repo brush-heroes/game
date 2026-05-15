@@ -58,6 +58,7 @@ public class SessionManager : MonoBehaviour
 
     public bool IsSessionRunning { get; private set; }
     public bool IsInTransition   { get; private set; }
+    public bool IsPaused         { get; private set; }
     public int  CurrentStepIndex => currentStepIndex;
     public MouthZone CurrentActiveZone => GetCurrentStep().zone;
     public MouthZone CurrentZone       => CurrentActiveZone;
@@ -104,6 +105,7 @@ public class SessionManager : MonoBehaviour
     void LateUpdate()
     {
         if (!IsSessionRunning) return;
+        if (IsPaused) return;
 
         totalSessionTime += Time.deltaTime;
         stepTimer        += Time.deltaTime;
@@ -157,6 +159,7 @@ public class SessionManager : MonoBehaviour
         IsSessionComplete = false;
         completedAllSteps = false;
         IsInTransition    = false;
+        IsPaused          = false;
         _transitionPending = false;
         currentStepIndex  = 0;
         totalSessionTime  = 0f;
@@ -181,6 +184,20 @@ public class SessionManager : MonoBehaviour
             return;
         }
         NotifyCurrentStepChanged();
+    }
+
+    public void Pause()
+    {
+        if (!IsSessionRunning || IsPaused) return;
+        IsPaused = true;
+        Debug.Log("[SessionManager] Session paused.");
+    }
+
+    public void Resume()
+    {
+        if (!IsSessionRunning || !IsPaused) return;
+        IsPaused = false;
+        Debug.Log("[SessionManager] Session resumed.");
     }
 
     public void EndSession()

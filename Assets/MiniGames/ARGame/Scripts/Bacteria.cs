@@ -29,12 +29,20 @@ public class Bacteria : MonoBehaviour
     bool visualsCached;
 
     public bool IsDying => _dying;
+    public float Health => currentHealth;
 
     public void Initialize(BacteriaSpawner spawner, MouthZone zone)
     {
         ownerSpawner = spawner;
         Zone = zone;
         visualsCached = false;
+    }
+
+    // Used when restoring bacteria after AR face loss/recovery: starts with a specific health.
+    public void InitializeWithHealth(BacteriaSpawner spawner, MouthZone zone, float startHealth)
+    {
+        Initialize(spawner, zone);
+        currentHealth = startHealth;
     }
 
     void Awake()

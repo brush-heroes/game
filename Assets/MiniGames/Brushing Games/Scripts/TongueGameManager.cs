@@ -28,6 +28,8 @@ public class TongueGameManager : MonoBehaviour
     private int remainingDirt;
     private bool gameActive;
 
+    public event System.Action TongueGameWon;
+
     private readonly List<GameObject> spawnedItems = new List<GameObject>();
 
     private void Update()
@@ -154,8 +156,9 @@ private Vector2 GetRandomPositionInsideTongue()
             messageText.gameObject.SetActive(false);
         }
 
+        Debug.Log("Victoria en limpieza de lengua");
+        TongueGameWon?.Invoke();
         TongueGameCompleted?.Invoke();
-        Debug.Log("Minijuegos de cepillado completados.");
     }
 
     private void ClearItems()
