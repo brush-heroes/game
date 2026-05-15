@@ -1,12 +1,7 @@
 {
-    "name": "BrushHeroes.ARGame",
+    "name": "BrushHeroes.PlayerData",
     "rootNamespace": "",
-    "references": [
-        "Unity.TextMeshPro",
-        "Unity.XR.ARFoundation",
-        "Unity.XR.ARSubsystems",
-        "BrushHeroes.PlayerData"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

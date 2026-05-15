@@ -27,6 +27,10 @@ public class GameScreenManager : MonoBehaviour
     [SerializeField] FaceTrackingManager faceTracker;
     [Tooltip("Overlay shown on the start screen while searching for a face (e.g. 'Buscando rostro...').")]
     [SerializeField] CanvasGroup faceSearchOverlay;
+    [Tooltip("Overlay shown mid-session when the face is lost — pauses time until face is detected again.")]
+    [SerializeField] CanvasGroup faceLostOverlay;
+
+    bool _pausedDueToFaceLoss;
 
     [Header("End Screen Content")]
     [SerializeField] Image resultImage;
@@ -61,6 +65,7 @@ public class GameScreenManager : MonoBehaviour
         SetScreen(gameHUD, false);
         SetScreen(endScreen, false);
         SetScreen(pauseScreen, false);
+        SetScreen(faceLostOverlay, false);
         if (guidePanel != null) guidePanel.SetActive(false);
 
         // Show face-search overlay until a face is detected.
@@ -162,16 +167,41 @@ public class GameScreenManager : MonoBehaviour
 
     void HandleFaceDetected()
     {
-        // Only act on the start screen — hide the "searching" overlay so the player can press Start.
+        // Start screen: hide the "searching" overlay so the player can press Start.
         if (startScreen != null && startScreen.alpha > 0f)
+        {
             SetScreen(faceSearchOverlay, false);
+            return;
+        }
+
+        // Mid-session: resume if we paused due to face loss.
+        if (_pausedDueToFaceLoss)
+        {
+            _pausedDueToFaceLoss = false;
+            SetScreen(faceLostOverlay, false);
+            sessionManager?.Resume();
+        }
     }
 
     void HandleFaceLost()
     {
-        // Only show the overlay again on the start screen; mid-game face loss is silently tolerated.
+        // Start screen: re-show the search overlay so buttons remain blocked.
         if (startScreen != null && startScreen.alpha > 0f)
+        {
             SetScreen(faceSearchOverlay, true);
+            return;
+        }
+
+        // Mid-session: pause the session and show the "put face back" overlay.
+        // Skip if a manual pause is already active so we don't fight that flow.
+        bool sessionRunning = sessionManager != null && sessionManager.IsSessionRunning;
+        bool manuallyPaused = pauseScreen != null && pauseScreen.alpha > 0f;
+        if (sessionRunning && !manuallyPaused && !_pausedDueToFaceLoss)
+        {
+            _pausedDueToFaceLoss = true;
+            sessionManager.Pause();
+            SetScreen(faceLostOverlay, true);
+        }
     }
 
     // ── Session events ────────────────────────────────────────────────────────
@@ -180,7 +210,9 @@ public class GameScreenManager : MonoBehaviour
     {
         // guidePanel was already shown in the button handler before StartSession()
         StartCoroutine(FadeOut(startScreen));
-        StartCoroutine(FadeIn(gameHUD, blockRaycasts: false));
+        // blockRaycasts must be true so PauseButton (and any future HUD button) can be clicked.
+        // Brushing still works in the rest of the screen because the HUD only covers the TopBar area.
+        StartCoroutine(FadeIn(gameHUD, blockRaycasts: true));
     }
 
     void HandleSessionEnded()  => ShowEndScreen(success: true);

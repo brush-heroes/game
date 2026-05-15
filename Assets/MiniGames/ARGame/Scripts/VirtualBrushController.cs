@@ -61,6 +61,14 @@ public class VirtualBrushController : MonoBehaviour
             return;
         }
 
+        if (sessionManager.IsPaused)
+        {
+            // Freeze brush input + cleaning while paused; keep visual on so the player sees state preserved.
+            IsCleaning = false;
+            IsMoving   = false;
+            return;
+        }
+
         SetBrushVisible(!GuidedMode);
 
         if (GuidedMode)
