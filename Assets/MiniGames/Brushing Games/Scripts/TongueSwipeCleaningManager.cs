@@ -194,6 +194,9 @@ public class TongueSwipeCleaningManager : MonoBehaviour
             return;
 
         topMostDirt.SetActive(false);
+        if (BrushingScoreManager.Instance != null)
+            BrushingScoreManager.Instance.AddPointsForTongueStage1();
+
         Debug.Log($"[TongueSwipe] Suciedad eliminada arriba->abajo en Y={topMostY:F2}");
     }
 

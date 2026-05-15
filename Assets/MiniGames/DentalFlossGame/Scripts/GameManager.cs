@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -9,7 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Game Settings")]
-    public float remainingTime = 15f;
+    public float remainingTime = 20f;
     public int totalScore = 0;
     public bool isGameActive = true;
 
@@ -21,14 +19,21 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Start()
     {
         Time.timeScale = 1;
         if (finalPanel != null) finalPanel.SetActive(false);
-        Debug.Log("Juego de Dental Floss iniciado");
+        Debug.Log("Juego de Dental Floss iniciado correctamente");
     }
 
     void Update()
@@ -57,7 +62,6 @@ public class GameManager : MonoBehaviour
     {
         if (isGameActive)
         {
-            ScoreSystem.Instance.AddScore(amount);
             totalScore += amount;
         }
     }
@@ -67,10 +71,34 @@ public class GameManager : MonoBehaviour
         isGameActive = false;
         remainingTime = 0;
 
-        if (finalPanel != null) finalPanel.SetActive(true);
+        if (finalPanel != null)
+        {
+            finalPanel.SetActive(true);
+
+            // Mostrar tip aleatorio
+            TipManager tipManager = finalPanel.GetComponentInChildren<TipManager>();
+            if (tipManager != null)
+            {
+                tipManager.MostrarTipAleatorio();
+            }
+        }
+
         if (finalScoreText != null) finalScoreText.text = "Puntaje Final: " + totalScore;
 
-        Time.timeScale = 0;
+        FlossController floss = FindObjectOfType<FlossController>();
+        if (floss != null)
+        {
+            floss.gameObject.SetActive(false);
+        }
+
+        // Activar el boton 3D
+        RestartButton restartButton = FindObjectOfType<RestartButton>();
+        if (restartButton != null)
+        {
+            restartButton.gameObject.SetActive(true);
+        }
+
+        // Time.timeScale = 0;  // NO pausar
     }
 
     public void Restart()
