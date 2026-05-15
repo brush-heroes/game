@@ -23,8 +23,8 @@ public class StageTimer : MonoBehaviour
     [Header("Current Flow")]
     public BushingSide currentSide;
     public bool isOutsidePhase = true;
-    public float transitionDelay = 3f;
-    public float stageDuration = 10f;
+    public float transitionDelay = 2f;
+    public float stageDuration = 15f;
 
     [Header("Right Stages")]
     public GameObject outsideStageRight;
@@ -37,6 +37,9 @@ public class StageTimer : MonoBehaviour
     public GameObject insideStageLeft;
     public BushingDirtSpawner outsideSpawnerLeft;
     public BushingDirtSpawner insideSpawnerLeft;
+
+    [Header("Teeth visuals (sucio / limpio por fase)")]
+    public LateralZonesVisualManager lateralZonesVisual;
 
     void Update()
     {
@@ -88,16 +91,21 @@ public class StageTimer : MonoBehaviour
     {
         if (isOutsidePhase)
         {
+            lateralZonesVisual?.EndPhase(LateralVisualPhase.OutsideRight);
+
             StopAndClearSpawner(outsideSpawnerRight);
             SetStageActive(outsideStageRight, false);
             SetStageActive(insideStageRight, true);
             StartSpawner(insideSpawnerRight);
 
             isOutsidePhase = false;
+            lateralZonesVisual?.BeginPhase(LateralVisualPhase.InsideRight);
             StartTimer(stageDuration);
         }
         else
         {
+            lateralZonesVisual?.EndPhase(LateralVisualPhase.InsideRight);
+
             StopAndClearSpawner(insideSpawnerRight);
             SetStageActive(insideStageRight, false);
 
@@ -110,16 +118,21 @@ public class StageTimer : MonoBehaviour
     {
         if (isOutsidePhase)
         {
+            lateralZonesVisual?.EndPhase(LateralVisualPhase.OutsideLeft);
+
             StopAndClearSpawner(outsideSpawnerLeft);
             SetStageActive(outsideStageLeft, false);
             SetStageActive(insideStageLeft, true);
             StartSpawner(insideSpawnerLeft);
 
             isOutsidePhase = false;
+            lateralZonesVisual?.BeginPhase(LateralVisualPhase.InsideLeft);
             StartTimer(stageDuration);
         }
         else
         {
+            lateralZonesVisual?.EndPhase(LateralVisualPhase.InsideLeft);
+
             StopAndClearSpawner(insideSpawnerLeft);
             SetStageActive(insideStageLeft, false);
 
@@ -182,6 +195,7 @@ public class StageTimer : MonoBehaviour
         SetStageActive(outsideStageLeft, false);
         SetStageActive(insideStageLeft, false);
 
+        lateralZonesVisual?.BeginPhase(LateralVisualPhase.OutsideRight);
         StartSpawner(outsideSpawnerRight);
         StartTimer(stageDuration);
     }
@@ -196,6 +210,7 @@ public class StageTimer : MonoBehaviour
         SetStageActive(outsideStageLeft, true);
         SetStageActive(insideStageLeft, false);
 
+        lateralZonesVisual?.BeginPhase(LateralVisualPhase.OutsideLeft);
         StartSpawner(outsideSpawnerLeft);
         StartTimer(stageDuration);
     }

@@ -4,6 +4,7 @@ using TMPro;
 
 public class TongueGameManager : MonoBehaviour
 {
+    public event System.Action TongueGameCompleted;
     [Header("Zona de movimiento")]
     public Collider2D tongueBounds;
 
@@ -123,6 +124,9 @@ private Vector2 GetRandomPositionInsideTongue()
     {
         remainingDirt--;
 
+        if (BrushingScoreManager.Instance != null)
+            BrushingScoreManager.Instance.AddPointsForTongueStage2BadBacteria();
+
         spawnedItems.Remove(item.gameObject);
         Destroy(item.gameObject);
 
@@ -134,6 +138,9 @@ private Vector2 GetRandomPositionInsideTongue()
 
     public void ClickedHygieneItem(BrushingTongueItem item)
     {
+        if (BrushingScoreManager.Instance != null)
+            BrushingScoreManager.Instance.ApplyPenaltyForTongueStage2GoodItem();
+
         Debug.Log("Ese no es suciedad.");
     }
 
@@ -142,9 +149,13 @@ private Vector2 GetRandomPositionInsideTongue()
         gameActive = false;
 
         if (messageText != null)
-            messageText.text = "¡Lengua limpia!";
+        {
+            messageText.text = string.Empty;
+            messageText.gameObject.SetActive(false);
+        }
 
-        Debug.Log("Victoria en limpieza de lengua");
+        TongueGameCompleted?.Invoke();
+        Debug.Log("Minijuegos de cepillado completados.");
     }
 
     private void ClearItems()

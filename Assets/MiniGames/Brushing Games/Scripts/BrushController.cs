@@ -3,52 +3,73 @@ using UnityEngine;
 
 public class BrushController : MonoBehaviour
 {
+    private enum OrientationMode
+    {
+        Chewing,
+        OutsideRight,
+        OutsideLeft
+    }
 
     public Vector3 normalScale = new Vector3(0.9f, 0.9f, 0.9f);
     public Vector3 zoomScale = new Vector3(0.01f, 0.01f, 0.01f);
 
-    [Header("Brush Rotation")]
+    [Header("Rotación — zona inicial (masticación)")]
     public Vector3 bristlesUpRotationEuler = Vector3.zero;
     public Vector3 bristlesDownRotationEuler = new Vector3(0f, 0f, 180f);
+
+    [Header("Rotación — laterales (base; espejo horizontal en X al aplicar)")]
     public Vector3 outsideRightMinigameRotationEuler = new Vector3(0f, 0f, 90f);
     public Vector3 outsideLeftMinigameRotationEuler = new Vector3(0f, 0f, -90f);
+
+    private OrientationMode orientationMode = OrientationMode.Chewing;
     private int directionSign = 1;
+    private bool isZoomMode;
     private Quaternion savedRotation;
+    private Vector3 savedLocalScale;
     private int savedDirectionSign = 1;
+    private OrientationMode savedOrientationMode;
     private bool hasSavedPose;
+    private bool followEnabled = true;
 
     public void SetZoomMode(bool isZoom)
     {
-        Vector3 baseScale = isZoom ? zoomScale : normalScale;
-        transform.localScale = new Vector3(Mathf.Abs(baseScale.x) * directionSign, baseScale.y, baseScale.z);
+        isZoomMode = isZoom;
+        ApplyScaleWithDirection(isZoom ? zoomScale : normalScale);
     }
 
     public void MirrorDirection()
     {
         directionSign *= -1;
-        transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+        ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
     }
 
     public void SetStartPose()
     {
+        orientationMode = OrientationMode.Chewing;
+        directionSign = 1;
         transform.rotation = Quaternion.Euler(bristlesDownRotationEuler);
+        ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
     }
 
     public void SetOutsideRightMinigamePose()
     {
         SavePoseIfNeeded();
-        transform.rotation = Quaternion.Euler(outsideRightMinigameRotationEuler);
-        directionSign = 1;
-        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        ApplyOutsideRightLateralPose();
     }
 
     public void SetOutsideLeftMinigamePose()
     {
         SavePoseIfNeeded();
+        ApplyOutsideLeftLateralPose();
+    }
 
-        transform.rotation = Quaternion.Euler(0f, 0f, -90f);
-        directionSign = 1;
-        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+    /// <summary>Vuelve a aplicar rotación y espejo lateral tras SetZoomMode.</summary>
+    public void RefreshLateralPoseAfterZoom()
+    {
+        if (orientationMode == OrientationMode.OutsideRight)
+            ApplyOutsideRightLateralPose();
+        else if (orientationMode == OrientationMode.OutsideLeft)
+            ApplyOutsideLeftLateralPose();
     }
 
     public void RestoreSavedPose()
@@ -57,9 +78,15 @@ public class BrushController : MonoBehaviour
             return;
 
         transform.rotation = savedRotation;
+        transform.localScale = savedLocalScale;
         directionSign = savedDirectionSign;
-        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x) * directionSign, transform.localScale.y, transform.localScale.z);
+        orientationMode = savedOrientationMode;
         hasSavedPose = false;
+    }
+
+    public void SetFollowEnabled(bool enabled)
+    {
+        followEnabled = enabled;
     }
 
     private void SavePoseIfNeeded()
@@ -68,12 +95,46 @@ public class BrushController : MonoBehaviour
             return;
 
         savedRotation = transform.rotation;
+        savedLocalScale = transform.localScale;
         savedDirectionSign = directionSign;
+        savedOrientationMode = orientationMode;
         hasSavedPose = true;
+    }
+
+    private void ApplyOutsideRightLateralPose()
+    {
+        orientationMode = OrientationMode.OutsideRight;
+        transform.rotation = Quaternion.Euler(MirrorEulerHorizontal(outsideRightMinigameRotationEuler));
+        directionSign = -1;
+        ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
+    }
+
+    private void ApplyOutsideLeftLateralPose()
+    {
+        orientationMode = OrientationMode.OutsideLeft;
+        transform.rotation = Quaternion.Euler(MirrorEulerHorizontal(outsideLeftMinigameRotationEuler));
+        directionSign = 1;
+        ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
+    }
+
+    private static Vector3 MirrorEulerHorizontal(Vector3 euler)
+    {
+        return new Vector3(euler.x, euler.y, -euler.z);
+    }
+
+    private void ApplyScaleWithDirection(Vector3 baseScale)
+    {
+        transform.localScale = new Vector3(
+            Mathf.Abs(baseScale.x) * directionSign,
+            baseScale.y,
+            baseScale.z);
     }
 
     void Update()
     {
+        if (!followEnabled)
+            return;
+
         Camera cam = Camera.main;
         if (cam == null)
             return;
@@ -92,7 +153,6 @@ public class BrushController : MonoBehaviour
 
     private bool TryGetPointerScreenPosition(out Vector2 position)
     {
-        // Android/iOS: usar touch como fuente principal.
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
@@ -100,7 +160,6 @@ public class BrushController : MonoBehaviour
             return true;
         }
 
-        // Fallback para pruebas en Editor/PC.
         if (Input.mousePresent)
         {
             position = Input.mousePosition;
