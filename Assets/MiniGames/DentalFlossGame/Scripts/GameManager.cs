@@ -71,7 +71,18 @@ public class GameManager : MonoBehaviour
         isGameActive = false;
         remainingTime = 0;
 
-        if (finalPanel != null) finalPanel.SetActive(true);
+        if (finalPanel != null)
+        {
+            finalPanel.SetActive(true);
+
+            // Mostrar tip aleatorio
+            TipManager tipManager = finalPanel.GetComponentInChildren<TipManager>();
+            if (tipManager != null)
+            {
+                tipManager.MostrarTipAleatorio();
+            }
+        }
+
         if (finalScoreText != null) finalScoreText.text = "Puntaje Final: " + totalScore;
 
         FlossController floss = FindObjectOfType<FlossController>();
