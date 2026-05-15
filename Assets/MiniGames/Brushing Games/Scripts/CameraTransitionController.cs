@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -21,6 +22,8 @@ public class CameraTransitionController : MonoBehaviour
 
     [Header("Speed")]
     public float moveDuration = 1f;
+
+    public float MoveDuration => moveDuration;
 
     private Coroutine currentTransition;
 
@@ -53,6 +56,22 @@ public class CameraTransitionController : MonoBehaviour
         StartTransition(normalView, normalSize);
     }
 
+    /// <summary>Vista amplia inicial (misma que al cargar la escena).</summary>
+    public void GoToInitialStartView()
+    {
+        StartTransition(normalView, initialStartSize);
+    }
+
+    /// <summary>Zoom out a la vista inicial; onProgress recibe t de 0 a 1 cada frame.</summary>
+    public IEnumerator CoGoToInitialStartView(Action<float> onProgress = null)
+    {
+        if (currentTransition != null)
+            StopCoroutine(currentTransition);
+
+        yield return CoTransitionTo(normalView, initialStartSize, onProgress);
+        currentTransition = null;
+    }
+
     public void GoToOutsideZoomView()
     {
         StartTransition(outsideZoomView, outsideZoomSize);
@@ -72,11 +91,14 @@ public class CameraTransitionController : MonoBehaviour
         if (currentTransition != null)
             StopCoroutine(currentTransition);
 
-        currentTransition = StartCoroutine(TransitionRoutine(target, targetSize));
+        currentTransition = StartCoroutine(CoTransitionTo(target, targetSize));
     }
 
-    private IEnumerator TransitionRoutine(Transform target, float targetSize)
+    private IEnumerator CoTransitionTo(Transform target, float targetSize, Action<float> onProgress = null)
     {
+        if (mainCamera == null || target == null)
+            yield break;
+
         Vector3 startPos = mainCamera.transform.position;
         float startSize = mainCamera.orthographicSize;
 
@@ -91,17 +113,18 @@ public class CameraTransitionController : MonoBehaviour
         while (time < moveDuration)
         {
             time += Time.deltaTime;
-            float t = time / moveDuration;
-            t = Mathf.SmoothStep(0f, 1f, t);
+            float t = Mathf.Clamp01(time / moveDuration);
+            float eased = Mathf.SmoothStep(0f, 1f, t);
 
-            mainCamera.transform.position = Vector3.Lerp(startPos, endPos, t);
-            mainCamera.orthographicSize = Mathf.Lerp(startSize, targetSize, t);
+            mainCamera.transform.position = Vector3.Lerp(startPos, endPos, eased);
+            mainCamera.orthographicSize = Mathf.Lerp(startSize, targetSize, eased);
+            onProgress?.Invoke(eased);
 
             yield return null;
         }
 
         mainCamera.transform.position = endPos;
         mainCamera.orthographicSize = targetSize;
-        currentTransition = null;
+        onProgress?.Invoke(1f);
     }
 }
