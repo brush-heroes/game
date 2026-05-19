@@ -64,16 +64,41 @@ namespace BrushHeroes.BrushingGames.Tests
                 "MirrorDirection debe invertir el signo de localScale.x");
         }
 
-        // UNIT-BRUSH-03d: SetStartPose aplica rotación de cerdas hacia abajo
+        // UNIT-BRUSH-03d: SetStartPose aplica rotación de cerdas hacia la izquierda
         [Test]
-        public void SetStartPose_AplicaRotacionBristlesDown()
+        public void SetStartPose_AplicaRotacionBristlesLeft()
         {
             _ctrl.SetStartPose();
 
-            var expectedRot = Quaternion.Euler(_ctrl.bristlesDownRotationEuler);
+            var expectedRot = Quaternion.Euler(_ctrl.verticalBristlesLeftEuler);
             Assert.AreEqual(expectedRot.eulerAngles.z,
                 _go.transform.rotation.eulerAngles.z, 0.5f,
-                "SetStartPose debe aplicar la rotación de cerdas hacia abajo");
+                "SetStartPose debe aplicar la rotación de cerdas hacia la izquierda");
+        }
+
+        // UNIT-BRUSH-03e: Chewing Right → usa verticalBristlesRightEuler + espejo
+        [Test]
+        public void ApplyDirectionPose_ChewingRight_UsaEulerDeZonaDerecha()
+        {
+            _ctrl.verticalBristlesRightEuler = new Vector3(0f, 0f, 90f);
+            _ctrl.SetZoomMode(false);
+            _ctrl.ApplyDirectionPose(ZoneType.Chewing, BrushDirectionSubZone.Right);
+
+            var expectedZ = Quaternion.Euler(_ctrl.verticalBristlesRightEuler).eulerAngles.z;
+            Assert.AreEqual(expectedZ, _go.transform.rotation.eulerAngles.z, 0.5f);
+            Assert.Less(_go.transform.localScale.x, 0f,
+                "Chewing Right debe aplicar cepillo al revés (scale.x negativo)");
+        }
+
+        // UNIT-BRUSH-03f: Inside Right → misma rotación base, sin doble espejo
+        [Test]
+        public void ApplyDirectionPose_InsideRight_MismaRotacionBase()
+        {
+            _ctrl.ApplyDirectionPose(ZoneType.Inside, BrushDirectionSubZone.Right);
+
+            var expectedZ = Quaternion.Euler(_ctrl.verticalBristlesLeftEuler).eulerAngles.z;
+            Assert.AreEqual(expectedZ, _go.transform.rotation.eulerAngles.z, 0.5f);
+            Assert.Greater(_go.transform.localScale.x, 0f);
         }
     }
 }

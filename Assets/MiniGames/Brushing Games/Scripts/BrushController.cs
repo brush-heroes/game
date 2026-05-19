@@ -1,27 +1,37 @@
 using UnityEngine;
 
-
 public class BrushController : MonoBehaviour
 {
     private enum OrientationMode
     {
-        Chewing,
-        OutsideRight,
-        OutsideLeft
+        Default,
+        DirectionPose,
+        OutsideRightLateral,
+        OutsideLeftLateral
     }
 
     public Vector3 normalScale = new Vector3(0.9f, 0.9f, 0.9f);
     public Vector3 zoomScale = new Vector3(0.01f, 0.01f, 0.01f);
 
-    [Header("Rotación — zona inicial (masticación)")]
-    public Vector3 bristlesUpRotationEuler = Vector3.zero;
-    public Vector3 bristlesDownRotationEuler = new Vector3(0f, 0f, 180f);
+    [Header("Chewing / Outside — sub-zonas Right y Left")]
+    [Tooltip("Direction_Right (con espejo). Pon aquí la rotación horizontal si la quieres en la zona derecha.")]
+    public Vector3 verticalBristlesRightEuler = new Vector3(0f, 0f, 90f);
+    [Tooltip("Direction_Left (sin espejo respecto a Right).")]
+    public Vector3 verticalBristlesLeftEuler = new Vector3(0f, 0f, 0f);
 
-    [Header("Rotación — laterales (base; espejo horizontal en X al aplicar)")]
+    [Header("Horizontal — zona Front (Chewing y Outside)")]
+    public Vector3 frontHorizontalRotationEuler = new Vector3(0f, 0f, 90f);
+
+    [Header("Inside — frente vertical")]
+    public Vector3 insideFrontVerticalEuler = new Vector3(0f, 0f, 0f);
+
+    [Header("Rotación — laterales zoom (círculos)")]
     public Vector3 outsideRightMinigameRotationEuler = new Vector3(0f, 0f, 90f);
     public Vector3 outsideLeftMinigameRotationEuler = new Vector3(0f, 0f, -90f);
 
-    private OrientationMode orientationMode = OrientationMode.Chewing;
+    private OrientationMode orientationMode = OrientationMode.Default;
+    private ZoneType directionZoneType;
+    private BrushDirectionSubZone directionSubZone;
     private int directionSign = 1;
     private bool isZoomMode;
     private Quaternion savedRotation;
@@ -45,9 +55,30 @@ public class BrushController : MonoBehaviour
 
     public void SetStartPose()
     {
-        orientationMode = OrientationMode.Chewing;
+        orientationMode = OrientationMode.Default;
         directionSign = 1;
-        transform.rotation = Quaternion.Euler(bristlesDownRotationEuler);
+        transform.rotation = Quaternion.Euler(verticalBristlesLeftEuler);
+        ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
+    }
+
+    public void ApplyDirectionPose(ZoneType zoneType, BrushDirectionSubZone subZone)
+    {
+        bool reversed;
+        Vector3 euler = ResolveDirectionEuler(zoneType, subZone, out reversed);
+        int targetSign = reversed ? -1 : 1;
+        Quaternion targetRotation = Quaternion.Euler(euler);
+
+        if (IsSameDirectionPose(zoneType, subZone, targetRotation, targetSign))
+        {
+            ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
+            return;
+        }
+
+        orientationMode = OrientationMode.DirectionPose;
+        directionZoneType = zoneType;
+        directionSubZone = subZone;
+        directionSign = targetSign;
+        transform.rotation = targetRotation;
         ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
     }
 
@@ -63,13 +94,10 @@ public class BrushController : MonoBehaviour
         ApplyOutsideLeftLateralPose();
     }
 
-    /// <summary>Vuelve a aplicar rotación y espejo lateral tras SetZoomMode.</summary>
+    /// <summary>Solo re-aplica escala tras zoom; la rotación lateral ya está fijada.</summary>
     public void RefreshLateralPoseAfterZoom()
     {
-        if (orientationMode == OrientationMode.OutsideRight)
-            ApplyOutsideRightLateralPose();
-        else if (orientationMode == OrientationMode.OutsideLeft)
-            ApplyOutsideLeftLateralPose();
+        ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
     }
 
     public void RestoreSavedPose()
@@ -89,6 +117,65 @@ public class BrushController : MonoBehaviour
         followEnabled = enabled;
     }
 
+    private bool IsSameDirectionPose(
+        ZoneType zoneType,
+        BrushDirectionSubZone subZone,
+        Quaternion targetRotation,
+        int targetSign)
+    {
+        if (orientationMode != OrientationMode.DirectionPose)
+            return false;
+
+        if (directionZoneType != zoneType || directionSubZone != subZone)
+            return false;
+
+        if (Quaternion.Angle(transform.rotation, targetRotation) > 0.05f)
+            return false;
+
+        return Mathf.Sign(transform.localScale.x) == Mathf.Sign(targetSign);
+    }
+
+    private Vector3 ResolveDirectionEuler(
+        ZoneType zoneType,
+        BrushDirectionSubZone subZone,
+        out bool reversed)
+    {
+        if (zoneType == ZoneType.Inside)
+        {
+            switch (subZone)
+            {
+                case BrushDirectionSubZone.Right:
+                    reversed = false;
+                    return verticalBristlesLeftEuler;
+                case BrushDirectionSubZone.Left:
+                    reversed = true;
+                    return verticalBristlesLeftEuler;
+                case BrushDirectionSubZone.Front:
+                    reversed = false;
+                    return insideFrontVerticalEuler;
+                default:
+                    reversed = false;
+                    return verticalBristlesLeftEuler;
+            }
+        }
+
+        switch (subZone)
+        {
+            case BrushDirectionSubZone.Right:
+                reversed = true;
+                return verticalBristlesRightEuler;
+            case BrushDirectionSubZone.Left:
+                reversed = false;
+                return verticalBristlesLeftEuler;
+            case BrushDirectionSubZone.Front:
+                reversed = false;
+                return frontHorizontalRotationEuler;
+            default:
+                reversed = true;
+                return verticalBristlesRightEuler;
+        }
+    }
+
     private void SavePoseIfNeeded()
     {
         if (hasSavedPose)
@@ -103,7 +190,7 @@ public class BrushController : MonoBehaviour
 
     private void ApplyOutsideRightLateralPose()
     {
-        orientationMode = OrientationMode.OutsideRight;
+        orientationMode = OrientationMode.OutsideRightLateral;
         transform.rotation = Quaternion.Euler(MirrorEulerHorizontal(outsideRightMinigameRotationEuler));
         directionSign = -1;
         ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);
@@ -111,7 +198,7 @@ public class BrushController : MonoBehaviour
 
     private void ApplyOutsideLeftLateralPose()
     {
-        orientationMode = OrientationMode.OutsideLeft;
+        orientationMode = OrientationMode.OutsideLeftLateral;
         transform.rotation = Quaternion.Euler(MirrorEulerHorizontal(outsideLeftMinigameRotationEuler));
         directionSign = 1;
         ApplyScaleWithDirection(isZoomMode ? zoomScale : normalScale);

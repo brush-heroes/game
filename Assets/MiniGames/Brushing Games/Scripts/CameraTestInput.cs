@@ -61,8 +61,6 @@ public class CameraTestInput : MonoBehaviour
 
         if (BrushGameManager.Instance != null)
         {
-            BrushGameManager.Instance.OutsideRightCompleted += HandleOutsideRightCompleted;
-            BrushGameManager.Instance.OutsideLeftCompleted += HandleOutsideLeftCompleted;
             BrushGameManager.Instance.RightSideCompleted += HandleRightSideCompleted;
             BrushGameManager.Instance.LeftSideCompleted += HandleLeftSideCompleted;
         }
@@ -95,8 +93,6 @@ public class CameraTestInput : MonoBehaviour
     {
         if (BrushGameManager.Instance != null)
         {
-            BrushGameManager.Instance.OutsideRightCompleted -= HandleOutsideRightCompleted;
-            BrushGameManager.Instance.OutsideLeftCompleted -= HandleOutsideLeftCompleted;
             BrushGameManager.Instance.RightSideCompleted -= HandleRightSideCompleted;
             BrushGameManager.Instance.LeftSideCompleted -= HandleLeftSideCompleted;
         }
@@ -210,21 +206,9 @@ public class CameraTestInput : MonoBehaviour
         );
     }
 
-    private void HandleOutsideRightCompleted()
-    {
-        if (brush != null)
-            brush.MirrorDirection();
-    }
-
     private void HandleLeftSideCompleted()
     {
         StartCoroutine(StartLeftWithDelay());
-    }
-
-    private void HandleOutsideLeftCompleted()
-    {
-        if (brush != null)
-            brush.MirrorDirection();
     }
 
     private void HandleRightSequenceCompleted()
@@ -232,12 +216,18 @@ public class CameraTestInput : MonoBehaviour
         ReturnToNormalView();
         if (brush != null)
             brush.RestoreSavedPose();
+
+        if (BrushGameManager.Instance != null)
+            BrushGameManager.Instance.ActivateZonesForCurrentPhase();
     }
 
     private void HandleLeftSequenceCompleted()
     {
         if (tongueSequenceStarted)
             return;
+
+        if (BrushGameManager.Instance != null)
+            BrushGameManager.Instance.DeactivateAllZoneGroups();
 
         tongueSequenceStarted = true;
         StartCoroutine(ReturnThenShowTongueInstruction());
@@ -278,6 +268,9 @@ public class CameraTestInput : MonoBehaviour
 
     private void ShowInstructionOutsideRight(Action onContinue)
     {
+        if (BrushGameManager.Instance != null)
+            BrushGameManager.Instance.DeactivateAllZoneGroups();
+
         if (instructionPanel == null)
         {
             onContinue?.Invoke();
@@ -293,6 +286,9 @@ public class CameraTestInput : MonoBehaviour
 
     private IEnumerator StartRightWithDelay()
     {
+        if (BrushGameManager.Instance != null)
+            BrushGameManager.Instance.DeactivateAllZoneGroups();
+
         if (brush != null)
             brush.SetOutsideRightMinigamePose();
 
@@ -301,10 +297,7 @@ public class CameraTestInput : MonoBehaviour
         yield return new WaitForSeconds(1.1f);
 
         if (brush != null)
-        {
             brush.SetZoomMode(true);
-            brush.RefreshLateralPoseAfterZoom();
-        }
 
         if (stageTimer != null)
         {
@@ -314,6 +307,9 @@ public class CameraTestInput : MonoBehaviour
 
     private IEnumerator StartLeftWithDelay()
     {
+        if (BrushGameManager.Instance != null)
+            BrushGameManager.Instance.DeactivateAllZoneGroups();
+
         if (brush != null)
             brush.SetOutsideLeftMinigamePose();
 
@@ -322,10 +318,7 @@ public class CameraTestInput : MonoBehaviour
         yield return new WaitForSeconds(1.1f);
 
         if (brush != null)
-        {
             brush.SetZoomMode(true);
-            brush.RefreshLateralPoseAfterZoom();
-        }
 
         if (stageTimer != null)
         {

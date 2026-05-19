@@ -32,6 +32,8 @@ public class BrushGameManager : MonoBehaviour
     public int cleaned = 0;
     public int target = 3;
 
+    private bool directionZonesActive;
+
     private void Awake()
     {
         Instance = this;
@@ -52,12 +54,43 @@ public class BrushGameManager : MonoBehaviour
         currentSide = ZoneSide.Right;
         cleaned = 0;
 
-        SetDirtAndZoneGroupActive(chewingRightGroup, chewingRightZonesGroup, true);
-        SetDirtAndZoneGroupActive(outsideRightGroup, outsideRightZonesGroup, false);
-        SetDirtAndZoneGroupActive(insideRightGroup, insideRightZonesGroup, false);
-        SetDirtAndZoneGroupActive(chewingLeftGroup, chewingLeftZonesGroup, false);
-        SetDirtAndZoneGroupActive(outsideLeftGroup, outsideLeftZonesGroup, false);
-        SetDirtAndZoneGroupActive(insideLeftGroup, insideLeftZonesGroup, false);
+        SetDirtGroupActive(chewingRightGroup, true);
+        SetDirtGroupActive(outsideRightGroup, false);
+        SetDirtGroupActive(insideRightGroup, false);
+        SetDirtGroupActive(chewingLeftGroup, false);
+        SetDirtGroupActive(outsideLeftGroup, false);
+        SetDirtGroupActive(insideLeftGroup, false);
+        ActivateZonesForCurrentPhase();
+    }
+
+    /// <summary>Apaga todas las sub-zonas de dirección (p. ej. durante zoom o minijuego lateral).</summary>
+    public bool AreDirectionZonesActive()
+    {
+        return directionZonesActive;
+    }
+
+    public void DeactivateAllZoneGroups()
+    {
+        directionZonesActive = false;
+        SetGroupActive(chewingRightZonesGroup, false);
+        SetGroupActive(outsideRightZonesGroup, false);
+        SetGroupActive(insideRightZonesGroup, false);
+        SetGroupActive(chewingLeftZonesGroup, false);
+        SetGroupActive(outsideLeftZonesGroup, false);
+        SetGroupActive(insideLeftZonesGroup, false);
+        BrushDirectionZoneDetector.ClearAllDetectors();
+    }
+
+    /// <summary>Activa solo el grupo de zonas de la fase actual (Chewing/Outside/Inside + lado).</summary>
+    public void ActivateZonesForCurrentPhase()
+    {
+        DeactivateAllZoneGroups();
+        GameObject zoneGroup = GetZoneGroupFor(currentType, currentSide);
+        if (zoneGroup != null)
+        {
+            SetGroupActive(zoneGroup, true);
+            directionZonesActive = true;
+        }
     }
 
     public void AddClean()
@@ -82,32 +115,34 @@ public class BrushGameManager : MonoBehaviour
 
         if (currentType == ZoneType.Chewing && currentSide == ZoneSide.Right)
         {
-            SetDirtAndZoneGroupActive(chewingRightGroup, chewingRightZonesGroup, false);
-            SetDirtAndZoneGroupActive(outsideRightGroup, outsideRightZonesGroup, true);
+            SetDirtGroupActive(chewingRightGroup, false);
+            SetDirtGroupActive(outsideRightGroup, true);
 
             currentType = ZoneType.Outside;
+            ActivateZonesForCurrentPhase();
         }
 
         else if (currentType == ZoneType.Outside && currentSide == ZoneSide.Right)
         {
-            SetDirtAndZoneGroupActive(outsideRightGroup, outsideRightZonesGroup, false);
-            SetDirtAndZoneGroupActive(insideRightGroup, insideRightZonesGroup, true);
+            SetDirtGroupActive(outsideRightGroup, false);
+            SetDirtGroupActive(insideRightGroup, true);
 
             currentType = ZoneType.Inside;
+            ActivateZonesForCurrentPhase();
             OutsideRightCompleted?.Invoke();
         }
 
         else if (currentType == ZoneType.Inside && currentSide == ZoneSide.Right)
         {
-            SetDirtAndZoneGroupActive(insideRightGroup, insideRightZonesGroup, false);
+            SetDirtGroupActive(insideRightGroup, false);
 
             Debug.Log("Terminaste lado derecho");
 
-            // PASAR A IZQUIERDA
-            SetDirtAndZoneGroupActive(chewingLeftGroup, chewingLeftZonesGroup, true);
+            SetDirtGroupActive(chewingLeftGroup, true);
 
             currentType = ZoneType.Chewing;
             currentSide = ZoneSide.Left;
+            DeactivateAllZoneGroups();
             RightSideCompleted?.Invoke();
 
             Debug.Log("Nueva fase: Chewing Left");
@@ -117,20 +152,22 @@ public class BrushGameManager : MonoBehaviour
 
         else if (currentType == ZoneType.Chewing && currentSide == ZoneSide.Left)
         {
-            SetDirtAndZoneGroupActive(chewingLeftGroup, chewingLeftZonesGroup, false);
-            SetDirtAndZoneGroupActive(outsideLeftGroup, outsideLeftZonesGroup, true);
+            SetDirtGroupActive(chewingLeftGroup, false);
+            SetDirtGroupActive(outsideLeftGroup, true);
 
             currentType = ZoneType.Outside;
+            ActivateZonesForCurrentPhase();
 
             Debug.Log("Nueva fase: Outside Left");
         }
 
         else if (currentType == ZoneType.Outside && currentSide == ZoneSide.Left)
         {
-            SetDirtAndZoneGroupActive(outsideLeftGroup, outsideLeftZonesGroup, false);
-            SetDirtAndZoneGroupActive(insideLeftGroup, insideLeftZonesGroup, true);
+            SetDirtGroupActive(outsideLeftGroup, false);
+            SetDirtGroupActive(insideLeftGroup, true);
 
             currentType = ZoneType.Inside;
+            ActivateZonesForCurrentPhase();
             OutsideLeftCompleted?.Invoke();
 
             Debug.Log("Nueva fase: Inside Left");
@@ -138,7 +175,8 @@ public class BrushGameManager : MonoBehaviour
 
         else if (currentType == ZoneType.Inside && currentSide == ZoneSide.Left)
         {
-            SetDirtAndZoneGroupActive(insideLeftGroup, insideLeftZonesGroup, false);
+            SetDirtGroupActive(insideLeftGroup, false);
+            DeactivateAllZoneGroups();
             LeftSideCompleted?.Invoke();
             BrushingCompleted?.Invoke();
 
@@ -146,13 +184,33 @@ public class BrushGameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Activa o desactiva el grupo de suciedad y el de zonas de detección de la misma fase (mismo estado).
-    /// </summary>
-    private void SetDirtAndZoneGroupActive(GameObject dirtGroup, GameObject zoneGroup, bool isActive)
+    private GameObject GetZoneGroupFor(ZoneType type, ZoneSide side)
+    {
+        if (side == ZoneSide.Right)
+        {
+            switch (type)
+            {
+                case ZoneType.Chewing: return chewingRightZonesGroup;
+                case ZoneType.Outside: return outsideRightZonesGroup;
+                case ZoneType.Inside: return insideRightZonesGroup;
+            }
+        }
+        else
+        {
+            switch (type)
+            {
+                case ZoneType.Chewing: return chewingLeftZonesGroup;
+                case ZoneType.Outside: return outsideLeftZonesGroup;
+                case ZoneType.Inside: return insideLeftZonesGroup;
+            }
+        }
+
+        return null;
+    }
+
+    private void SetDirtGroupActive(GameObject dirtGroup, bool isActive)
     {
         SetGroupActive(dirtGroup, isActive);
-        SetGroupActive(zoneGroup, isActive);
     }
 
     private void SetGroupActive(GameObject group, bool isActive)

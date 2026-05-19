@@ -75,6 +75,9 @@ public class StageTimer : MonoBehaviour
 
     private IEnumerator HandleStageTransition()
     {
+        if (BrushGameManager.Instance != null)
+            BrushGameManager.Instance.DeactivateAllZoneGroups();
+
         yield return new WaitForSeconds(transitionDelay);
 
         if (currentSide == BushingSide.Right)
